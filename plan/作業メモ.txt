@@ -2,7 +2,7 @@
 
 
 ＜不明点＞
-・html, css, js, Djangoの具体的な連携方法
+・html, css, js, Djangoの具体的な連携方法（りん）
 ・
 
 <gitlabコマンド>
@@ -15,8 +15,8 @@
 ・git push
 commitをGitLabサーバに送り込む
 
-・git clone ...
+・git clone ＜リポジトリURL＞
 手元に作業コピーを作る
 
-
-・他のメンバーがpushした変更を取り込む
+・git pull
+他のメンバーがpushした変更を取り込む
