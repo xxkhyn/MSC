@@ -1,0 +1,21 @@
+<やること>
+
+
+＜不明点＞
+・html, css, js, Djangoの具体的な連携方法
+・
+
+<gitlabコマンド>
+・git add
+ファイルやディレクトリの追加
+
+・git commit -a　-m ""
+コミット(コマンド必須)
+
+・git push
+commitをGitLabサーバに送り込む
+
+・手元に作業コピーを作る
+git clone ...
+
+・他のメンバーがpushした変更を取り込む

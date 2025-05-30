@@ -99,3 +99,135 @@ UI制御（クリックで牌を選択、結果画面のアニメーション）
 5. 「点数計算実行ボタン」ボタンを押す。
 6. 点数計算
 7. "点数表示欄"が点数・役・翻数・符数を表示
+
+### scorer/__init__.py
+# パッケージ初期化ファイル（空でもOK）
+
+
+### scorer/models.py
+from django.db import models
+
+class ScoreResult(models.Model):
+    han = models.IntegerField(verbose_name="翻数")
+    fu = models.IntegerField(verbose_name="符数")
+    point = models.IntegerField(verbose_name="得点")
+    yaku_list = models.JSONField(verbose_name="役一覧")
+    error_message = models.TextField(blank=True, null=True, verbose_name="エラーメッセージ")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+### scorer/utils.py
+# 牌の整形や判定の補助関数など
+
+def parse_tile(tile_str):
+    # 例: '1m' → (1, 'm') に変換
+    return (int(tile_str[0]), tile_str[1])
+
+
+def is_valid_hand(hand):
+    # 手牌の基本的なバリデーション（枚数、フォーマット等）
+    return len(hand) in [13, 14]  # 和了前 or 和了時
+
+
+### scorer/yaku.py
+# 役判定ロジック（必要に応じて細分化）
+
+def detect_yaku(hand_obj, condition_obj):
+    yaku_list = []
+    han = 0
+
+    if condition_obj.is_riichi:
+        yaku_list.append("リーチ")
+        han += 1
+    if condition_obj.is_tsumo:
+        yaku_list.append("門前清自摸和")
+        han += 1
+
+    # 他の役も追加する
+    return yaku_list, han
+
+
+### scorer/scorer.py
+from .utils import is_valid_hand
+from .yaku import detect_yaku
+from .models import ScoreResult
+
+
+def calculate_score(hand_obj, condition_obj):
+    if not is_valid_hand(hand_obj.hand_pai):
+        return ScoreResult.objects.create(
+            han=0, fu=0, point=0, yaku_list=[], error_message="不正な手牌の形です。"
+        )
+
+    # 役判定
+    yaku_list, han = detect_yaku(hand_obj, condition_obj)
+
+    # 仮で符と点数を計算（詳細は後で）
+    fu = 30
+    point = 1000 * han  # 仮の計算
+
+    return ScoreResult.objects.create(
+        han=han,
+        fu=fu,
+        point=point,
+        yaku_list=yaku_list,
+        error_message=""
+    )
+
+
+
+
+
+
+# --- models.py ---
+from django.db import models
+
+class ScoreResult(models.Model):
+    total_point = models.IntegerField(verbose_name="得点")
+    han = models.IntegerField(verbose_name="翻数")
+    fu = models.IntegerField(verbose_name="符数")
+    yaku_list = models.JSONField(verbose_name="構成役の一覧")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.han}翻{self.fu}符 {self.total_point}点"
+
+
+# --- views.py ---
+from django.shortcuts import render, get_object_or_404
+from .models import ScoreResult
+
+def score_result_view(request, result_id):
+    result = get_object_or_404(ScoreResult, pk=result_id)
+    return render(request, "MSC/score_result.html", {"result": result})
+
+
+# --- urls.py ---
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path("result/<int:result_id>/", views.score_result_view, name="score_result"),
+]
+
+
+# --- templates/MSC/score_result.html ---
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>点数結果</title>
+</head>
+<body>
+    <h1>点数結果</h1>
+    <p><strong>得点:</strong> {{ result.total_point }} 点</p>
+    <p><strong>翻数:</strong> {{ result.han }} 翻</p>
+    <p><strong>符数:</strong> {{ result.fu }} 符</p>
+    <p><strong>構成役:</strong></p>
+    <ul>
+        {% for yaku in result.yaku_list %}
+            <li>{{ yaku }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
