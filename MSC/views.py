@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ConditionForm, HandForm
-from .models import Condition, Hand
+from .models import Condition, Hand, ScoreResult
 
 def condition_input_view(request):
     """条件入力用ビュー"""
@@ -35,5 +35,10 @@ def hand_input_view(request):
         form = HandForm()
 
     return render(request, 'MSC/hand.html', {'form': form})
+
+def score_result_view(request, result_id):
+    result = get_object_or_404(ScoreResult, pk=result_id)
+    return render(request, "MSC/score_result.html", {"result": result})
+
 
 

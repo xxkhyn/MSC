@@ -1,5 +1,6 @@
 from django.db import models
 
+# 条件オブジェクト
 class Condition(models.Model):
   """ユーザーが選択する麻雀の状況条件（リーチ、ツモ、チーなど）を保持するモデル"""
 
@@ -29,6 +30,7 @@ class Condition(models.Model):
   def __str__(self):
     return f"Condition(Riichi={self.is_riichi}, Tsumo={self.is_tsumo})"
 
+# 手牌オブジェクト
 class Hand(models.Model):
   """ユーザーが選択した、点数を知りたいユーザー自身の手牌の情報を保存する"""
 
@@ -52,3 +54,13 @@ class Hand(models.Model):
 
   def __str__(self):
     return f"Hand({','.join(self.hand_pai)} + {self.winning_pai})"
+  
+# 点数計算結果オブジェクト
+class ScoreResult(models.Model):
+    han = models.IntegerField(verbose_name="翻数")
+    fu = models.IntegerField(verbose_name="符数")
+    point = models.IntegerField(verbose_name="得点")
+    yaku_list = models.JSONField(verbose_name="役一覧")
+    error_message = models.TextField(blank=True, null=True, verbose_name="エラーメッセージ")
+    created_at = models.DateTimeField(auto_now_add=True)
+
