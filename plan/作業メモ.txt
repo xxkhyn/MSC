@@ -2,21 +2,20 @@
 
 
 ＜不明点＞
-・html, css, js, Djangoの具体的な連携方法（りん）
+・html, css, js, Djangoの具体的な連携方法
 ・
 
 <gitlabコマンド>
-・git add .
+・git add
 ファイルやディレクトリの追加
 
 ・git commit -a　-m ""
-コミット(コメント必須)
+コミット(コマンド必須)
 
 ・git push
 commitをGitLabサーバに送り込む
 
-・git clone ＜リポジトリURL＞
-手元に作業コピーを作る
+・手元に作業コピーを作る
+git clone ...
 
-・git pull
-他のメンバーがpushした変更を取り込む
+・他のメンバーがpushした変更を取り込む
