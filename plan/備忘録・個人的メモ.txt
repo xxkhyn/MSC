@@ -1,0 +1,5 @@
+・DjangoはテンプレートHTMLを直接URLで読み込めない
+<iframe src="tehai1.html"></iframe>  ←　このような記述だと接続拒否になる
+
+Djangoは templates/ のファイルは、render()を通じてビューから返されるものだけがブラウザに届く。
+static/ に置けば直接読み込むこともできるが、HTMLはテンプレート処理ができないためテンプレート機能を使うならビュー経由が基本。
