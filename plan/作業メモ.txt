@@ -15,7 +15,7 @@
 ・git push
 commitをGitLabサーバに送り込む
 
-・git clone ...
+・git clone 
 手元に作業コピーを作る
 
 
