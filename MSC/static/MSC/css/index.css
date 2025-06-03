@@ -1,0 +1,28 @@
+body { 
+  margin: 0; 
+  font-family: sans-serif; 
+  background: #f0f0f0; 
+}
+
+.header {
+  background: #007aff;
+  color: white;
+  padding: 10px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.section-tokuten {
+  height: 50px;
+  overflow: auto;
+}
+
+.section-tehai {
+  height: 65vh;
+  overflow: auto;
+}
+
+.section-jouken {
+  height: 240px;
+  overflow: auto;
+}

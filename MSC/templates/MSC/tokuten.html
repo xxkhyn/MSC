@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>得点結果</title>
+  <link rel="stylesheet" href="{% static 'MSC/score_result.css' %}" />
+</head>
+<body>
+  <div class="container">
+    <h1>得点結果</h1>
+    <input type="hidden" id="result-id" value="{{ result.id }}">
+
+
+    {% if result.error_message %}
+      <div class="error">
+        <p>⚠ エラー: {{ result.error_message }}</p>
+      </div>
+    {% else %}
+      <div class="score-block">
+        <p><strong>翻数:</strong> {{ result.han }} 翻</p>
+        <p><strong>符数:</strong> {{ result.fu }} 符</p>
+        <p><strong>得点:</strong> {{ result.point }} 点</p>
+        <p><strong>役:</strong></p>
+        <ul class="yaku-list">
+          {% for yaku in result.yaku_list %}
+            <li>{{ yaku }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <button id="reload-button">再読み込み</button>
+  </div>
+
+  <script src="{% static 'MSC/score_result.js' %}"></script>
+</body>
+</html>

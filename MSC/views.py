@@ -1,6 +1,15 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404 
 from .forms import ConditionForm, HandForm
 from .models import Condition, Hand, ScoreResult
+
+def index_view(request):
+    hand_form = HandForm()
+    condition_form = ConditionForm()
+
+    return render(request, 'MSC/index.html', {
+        'hand_form': hand_form,
+        'condition_form': condition_form,
+    })
 
 def condition_input_view(request):
     """条件入力用ビュー"""

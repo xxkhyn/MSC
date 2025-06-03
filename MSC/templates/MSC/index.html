@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>麻雀得点計算機</title>
+  <link rel="stylesheet" href="{% static 'MSC/css/index.css' %}">
+  <link rel="stylesheet" href="{% static 'MSC/css/style.css' %}">
+</head>
+<body>
+  <div class="header">麻雀得点計算機</div>
+
+  <div class="section tokuten">
+    {% include 'MSC/tokuten.html' %}
+  </div>
+
+  <div class="section tokuten">
+    {% include 'MSC/tehai1.html' %}
+  </div>
+
+  <div class="section tokuten">
+    {% include 'MSC/jouken.html' %}
+  </div>
+
+</body>
+</html>
