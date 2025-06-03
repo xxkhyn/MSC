@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404 
 from .forms import ConditionForm, HandForm
 from .models import Condition, Hand, ScoreResult
 
