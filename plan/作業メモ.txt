@@ -5,12 +5,17 @@
 ・上記のあと、html内のPython、Djangoで書き換えられそうな処理を書き換える。
 ・決定ボタンを作る。
 ・デザインを綺麗にする。
+・画面遷移を行わずデータのやり取りを行う
+→非同期通信
 
-◯
+◯バックエンド
+・点数計算モジュールが手牌オブジェクトと条件オブジェクトを取得するビューを書く。
+
+条件モジュールに関して１通りの流れを確かめる。
 
 ＜不明点＞
 ・html, css, js, Djangoの具体的な連携方法
-・
+・非同期通信の方法
 
 <gitlabコマンド>
 ・git add
@@ -22,10 +27,13 @@
 ・git push
 commitをGitLabサーバに送り込む
 
-・手元に作業コピーを作る
-git clone ...
+・git clone <リポジトリURL>
+手元に作業コピーを作る
 
-・他のメンバーがpushした変更を取り込む
 
-・仮想環境アクティベート
- C:\Users\n1013\MSC_project\venv\Scripts\Activate.ps1
+・git pull
+他のメンバーがpushした変更を取り込む
+
+・C:\Users\n1013\MSC_project\venv\Scripts\Activate.ps1
+仮想環境アクティベート
+ 
