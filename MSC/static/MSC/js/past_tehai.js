@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const tileImages = document.querySelectorAll('.tile-img');
   const tileSlots = document.querySelectorAll('.tile-slot');
-  const resetButton = document.getElementById('reset-button'); // 追加
+  const resetButton = document.getElementById('reset-button');
+  const submitButton = document.getElementById('submit-hand'); // 追加
 
   // CSRFトークンをCookieから取得する関数
   function getCookie(name) {
@@ -20,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const csrftoken = getCookie('csrftoken');
 
-  // --- ここでサーバーに手牌を送る関数 ---
   function sendHandToServer() {
     const hand = [];
     tileSlots.forEach(slot => {
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData();
     formData.append('hand_pai', hand.join(','));
 
-    fetch('/index/', {  // ← 実際の送信URLに変更してください
+    fetch('/index/', {
       method: 'POST',
       headers: {
         'X-CSRFToken': csrftoken,
@@ -40,50 +40,45 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(response => response.json())
     .then(data => {
       console.log('送信成功:', data);
-      // 必要ならここで点数計算結果などを画面表示する処理を追加
+      // 必要ならここで画面更新など
     })
     .catch(error => {
       console.error('送信エラー:', error);
     });
   }
 
-  // 牌を選択して追加する
+  // --- ▼ 自動送信の呼び出しを削除 ▼ ---
   tileImages.forEach(img => {
     img.addEventListener('click', () => {
       const tileSrc = img.src;
       const tileCode = img.dataset.tile;
-  
-      // 通常牌の枚数チェック（4枚まで）
+
       const count = Array.from(tileSlots).filter(slot => slot.dataset.tile === tileCode).length;
       if (count >= 4) {
         alert(`「${tileCode}」は4枚までしか選べません`);
         return;
       }
-  
-      // 赤牌判定（コードに ' が含まれていたら赤牌とみなす）
+
       if (tileCode.includes("'")) {
-        // 赤牌の枚数をカウント（' を含むすべての赤牌）
         const redCount = Array.from(tileSlots).filter(slot => slot.dataset.tile && slot.dataset.tile.includes("'")).length;
         if (redCount >= 1) {
           alert('赤牌は1枚までしか選べません');
           return;
         }
       }
-  
+
       const emptySlot = findNextEmptySlot();
       if (emptySlot) {
         emptySlot.style.backgroundImage = `url(${tileSrc})`;
         emptySlot.dataset.tile = tileCode;
-  
+
         refillAndSort();
 
-        sendHandToServer();  // ← ここで送信！
+        // sendHandToServer(); ← 削除
       }
     });
   });
-  
 
-  // 牌を削除する
   tileSlots.forEach(slot => {
     slot.addEventListener('click', () => {
       slot.style.backgroundImage = '';
@@ -91,18 +86,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
       refillAndSort();
 
-      sendHandToServer();  // ← ここで送信！
+      // sendHandToServer(); ← 削除
     });
   });
 
-  // 🔁 リセットボタン処理もここで！
   resetButton.addEventListener('click', () => {
     tileSlots.forEach(slot => {
       slot.style.backgroundImage = '';
       delete slot.dataset.tile;
     });
 
-    sendHandToServer();  // ← リセット後も送信！
+    // sendHandToServer(); ← 削除
+  });
+
+  // ✅ 「送信」ボタンが押されたときだけ送る！
+  submitButton.addEventListener('click', () => {
+    sendHandToServer();
   });
 
   function findNextEmptySlot() {
@@ -111,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function refillAndSort() {
     const tiles = [];
-    document.querySelectorAll('.tile-slot').forEach(slot => {
+    tileSlots.forEach(slot => {
       if (slot.dataset.tile) {
         tiles.push({
           code: slot.dataset.tile,
@@ -135,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { suit: 'z', num: 99, isRed: false };
       }
     }
-    
 
     tiles.sort((a, b) => {
       const A = normalize(a.code);

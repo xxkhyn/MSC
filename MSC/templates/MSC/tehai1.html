@@ -1,6 +1,11 @@
 {% load static %}
-{% comment %} <form method="post" action="{% url 'hand_iput' %}"> {% endcomment %}
+{% comment %} <form method="post" action="{% url 'hand_input' %}"> {% endcomment %}
   {% csrf_token %}
+  <input type="hidden" name="hand_pai" id="handPaiInput">
+  <input type="hidden" name="winning_pai" id="winningPaiInput">
+  <input type="hidden" name="is_huuro" id="isHuuroInput">
+  <input type="hidden" name="huuro" id="huuroInput">
+  <input type="hidden" name="dora_pai" id="doraInput">
 
   {% comment %}
     (type="hidden") = 画面には表示されないフィールド
@@ -104,11 +109,11 @@
 
   <!-- ユーザーがフォームを送信するための送信ボタン-->
   <div class="section">
-    <button type="submit" class="btn">送信</button>
+    <button id="submit-hand" class="btn">送信</button>
   </div>
 
 </form>
 
 <link rel="stylesheet" href="../../static/MSC/css/style.css" />
-<script src="{% static 'MSC/js/tehai.js' %}"></script>
+<script src="{% static 'MSC/js/past_tehai.js' %}"></script>
 
