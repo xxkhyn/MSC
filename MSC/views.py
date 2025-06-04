@@ -5,10 +5,12 @@ from .models import Condition, Hand, ScoreResult
 def index_view(request):
     hand_form = HandForm()
     condition_form = ConditionForm()
+    result = ScoreResult.objects.last()
 
     return render(request, 'MSC/index.html', {
         'hand_form': hand_form,
         'condition_form': condition_form,
+        'result': result,
     })
 
 def condition_input_view(request):
@@ -49,5 +51,17 @@ def score_result_view(request, result_id):
     result = get_object_or_404(ScoreResult, pk=result_id)
     return render(request, "MSC/score_result.html", {"result": result})
 
+from django.http import JsonResponse
+
+def score_result_api_view(request, result_id):
+    result = get_object_or_404(ScoreResult, pk=result_id)
+    data = {
+        "han": result.han,
+        "fu": result.fu,
+        "point": result.point,
+        "yaku_list": result.yaku_list,
+        "error_message": result.error_message or "",
+    }
+    return JsonResponse(data)
 
 
