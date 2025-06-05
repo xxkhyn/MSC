@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404 
 from .forms import ConditionForm, HandForm
 from .models import Condition, Hand, ScoreResult
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
 
 def index_view(request):
     hand_form = HandForm()
@@ -11,20 +14,23 @@ def index_view(request):
         'condition_form': condition_form,
     })
 
-def condition_input_view(request):
-    """条件入力用ビュー"""
+@csrf_exempt
+def condition_submit_api(request):
     if request.method == 'POST':
-        form = ConditionForm(request.POST)
-        if form.is_valid():
-            # 辞書展開でフィールドをそのまま渡す
-            condition = Condition.objects.create(form.cleaned_data)
-            return redirect('calculate_score', condition_id=condition.id)
-    else:
-        form = ConditionForm()
+        try:
+            data = json.loads(request.body)
 
-    return render(request, 'MSC/condition_form.html', {
-        'form': form
-    })
+            condition = Condition.objects.create(
+                is_riichi = data.get("is_riichi", False),
+                is_ippatsu=data.get("is_ippatsu", False),
+                prevalent_wind=data.get("prevalent_wind", "east"),
+                seat_wind=data.get("seat_wind", "east"),
+            )
+            return JsonResponse({"success": True, "condition_id": condition.id})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
 def hand_input_view(request):
     """手牌入力用ビュー＾"""
