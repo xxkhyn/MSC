@@ -55,6 +55,34 @@ def hand_input_view(request):
     return render(request, 'MSC/hand.html', {'form': form})
 
 @csrf_exempt
+def hand_input_api(request):
+    """JSONを受け取ってHandを作成するAPI"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # hand_paiだけは必須、他はオプショナル
+            if not data.get('hand_pai'):
+                return JsonResponse({'error': 'hand_pai is required'}, status=400)
+
+            # Hand作成（空文字列も許可）
+            hand = Hand.objects.create(
+                hand_pai=data.get('hand_pai', ''),
+                winning_pai=data.get('winning_pai', ''),
+                is_huuro=data.get('is_huuro', False),
+                huuro=data.get('huuro', ''),
+                dora_pai=data.get('dora_pai', '')
+            )
+            return JsonResponse({'hand_id': hand.id}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+
+@csrf_exempt
 def calculate_score_api(request):
     if request.method == 'POST':
         try:

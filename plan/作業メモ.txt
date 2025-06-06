@@ -73,8 +73,18 @@ commitして確定させてファイルやディレクトリをGitLabサーバ�
 ・git pull
 他のメンバーがpushした変更を取り込む
 
+・rebaseはやらないで
+
+・ まとめ（pull前に変更してしまったら）
+状況	　　　　　　　　対応
+作業を保存したい	　　add → commit → pull
+まだ commit したくない	git stash → pull → git stash pop
+pull でコンフリクトした	手動修正 → add → commit
+
 ・C:\Users\n1013\MSC_project\venv\Scripts\Activate.ps1
 仮想環境アクティベート
+
+
  
  ＜班wiki　参考＞
 ・２４年　０５

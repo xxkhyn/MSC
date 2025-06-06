@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const scoreArea = document.getElementById('score-area');
   
     reloadButton.addEventListener('click', () => {
-      fetch(`/score_result_api/${resultId}/`)
+      fetch(`/api/score/calculate/${resultId}/`)
         .then(response => {
           if (!response.ok) throw new Error('Network response was not OK');
           return response.json();

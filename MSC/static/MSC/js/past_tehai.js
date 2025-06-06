@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tileImages = document.querySelectorAll('.tile-img');
   const tileSlots = document.querySelectorAll('.tile-slot');
   const resetButton = document.getElementById('reset-button');
-  const submitButton = document.getElementById('submit-hand'); // 追加
+  const submitButton = document.getElementById('submit-hand');
 
   // CSRFトークンをCookieから取得する関数
   function getCookie(name) {
@@ -22,32 +22,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const csrftoken = getCookie('csrftoken');
 
   function sendHandToServer() {
+    console.log('sendHandToServer called');
+    
     const hand = [];
     tileSlots.forEach(slot => {
       if (slot.dataset.tile) hand.push(slot.dataset.tile);
     });
 
-    const formData = new FormData();
-    formData.append('hand_pai', hand.join(','));
+    if (hand.length === 0) {
+      alert("手牌を選択してください。");
+      return;
+    }
 
-    fetch('/index/', {
+    const payload = {
+      hand_pai: hand.join(','),
+      winning_pai: "1m",
+      is_huuro: false,
+      huuro: "",
+      dora_pai: "1z",
+    };
+
+    console.log('Sending to:', 'http://127.0.0.1:8000/api/hand-input/');
+    console.log('Payload:', payload);
+
+    fetch('/api/hand-input/', {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'X-CSRFToken': csrftoken,
       },
-      body: formData,
+      body: JSON.stringify(payload),
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log('Response status:', response.status);
+      console.log('Response URL:', response.url);
+      
+      if (!response.ok) {
+        return response.text().then(text => {
+          console.log('Error response body:', text);
+          throw new Error(`HTTP ${response.status}: ${text}`);
+        });
+      }
+      
+      return response.json();
+    })
     .then(data => {
       console.log('送信成功:', data);
-      // 必要ならここで画面更新など
+      alert('送信成功！');
     })
     .catch(error => {
       console.error('送信エラー:', error);
+      alert(`送信に失敗しました: ${error.message}`);
     });
   }
 
-  // --- ▼ 自動送信の呼び出しを削除 ▼ ---
+  // タイル選択のイベントリスナー
   tileImages.forEach(img => {
     img.addEventListener('click', () => {
       const tileSrc = img.src;
@@ -71,39 +100,36 @@ document.addEventListener('DOMContentLoaded', () => {
       if (emptySlot) {
         emptySlot.style.backgroundImage = `url(${tileSrc})`;
         emptySlot.dataset.tile = tileCode;
-
         refillAndSort();
-
-        // sendHandToServer(); ← 削除
       }
     });
   });
 
+  // タイルスロットのクリック（削除）
   tileSlots.forEach(slot => {
     slot.addEventListener('click', () => {
       slot.style.backgroundImage = '';
       delete slot.dataset.tile;
-
       refillAndSort();
-
-      // sendHandToServer(); ← 削除
     });
   });
 
+  // リセットボタン
   resetButton.addEventListener('click', () => {
     tileSlots.forEach(slot => {
       slot.style.backgroundImage = '';
       delete slot.dataset.tile;
     });
-
-    // sendHandToServer(); ← 削除
   });
 
-  // ✅ 「送信」ボタンが押されたときだけ送る！
-  submitButton.addEventListener('click', () => {
+  // 送信ボタン（重複削除・event.preventDefault追加）
+  submitButton.addEventListener('click', (event) => {
+    event.preventDefault();  // フォーム送信を阻止
+    console.log('Submit button clicked');
     sendHandToServer();
   });
 
+  // ヘルパー関数
   function findNextEmptySlot() {
     return Array.from(tileSlots).find(slot => !slot.dataset.tile);
   }

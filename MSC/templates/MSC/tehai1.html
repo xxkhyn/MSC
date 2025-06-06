@@ -1,5 +1,5 @@
 {% load static %}
-{% comment %} <form method="post" action="{% url 'hand_input' %}"> {% endcomment %}
+{% comment %}  {% endcomment %}
   {% csrf_token %}
   <input type="hidden" name="hand_pai" id="handPaiInput">
   <input type="hidden" name="winning_pai" id="winningPaiInput">
@@ -109,11 +109,10 @@
 
   <!-- ユーザーがフォームを送信するための送信ボタン-->
   <div class="section">
-    <button id="submit-hand" class="btn">送信</button>
+    <button id="submit-hand" class="btn" type="button">送信</button>
   </div>
 
-</form>
+
 
 <link rel="stylesheet" href="../../static/MSC/css/style.css" />
-<script src="{% static 'MSC/js/past_tehai.js' %}"></script>
-
+<script src="{% static 'MSC/js/tehai.js' %}"></script>
