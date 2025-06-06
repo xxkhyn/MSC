@@ -43,7 +43,7 @@ commitして確定させてファイルやディレクトリをGitLabサーバ�
 ・git clone ...
 手元に作業コピーを作る
 
-・git pull
+・git pull --rebase origin master
 他のメンバーがpushした変更を取り込む
 
 ・C:\Users\n1013\MSC_project\venv\Scripts\Activate.ps1
