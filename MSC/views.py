@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404 
 from .forms import ConditionForm, HandForm
 from .models import Condition, Hand, ScoreResult
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from MSC.logic import calculator
+import json
 
 def index_view(request):
     hand_form = HandForm()
@@ -13,20 +17,23 @@ def index_view(request):
         'result': result,
     })
 
-def condition_input_view(request):
-    """条件入力用ビュー"""
+@csrf_exempt
+def condition_submit_api(request):
     if request.method == 'POST':
-        form = ConditionForm(request.POST)
-        if form.is_valid():
-            # 辞書展開でフィールドをそのまま渡す
-            condition = Condition.objects.create(form.cleaned_data)
-            return redirect('calculate_score', condition_id=condition.id)
-    else:
-        form = ConditionForm()
+        try:
+            data = json.loads(request.body)
 
-    return render(request, 'MSC/condition_form.html', {
-        'form': form
-    })
+            condition = Condition.objects.create(
+                is_riichi = data.get("is_riichi", False),
+                is_ippatsu=data.get("is_ippatsu", False),
+                prevalent_wind=data.get("prevalent_wind", "east"),
+                seat_wind=data.get("seat_wind", "east"),
+            )
+            return JsonResponse({"success": True, "condition_id": condition.id})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
 def hand_input_view(request):
     """手牌入力用ビュー＾"""
@@ -46,6 +53,31 @@ def hand_input_view(request):
         form = HandForm()
 
     return render(request, 'MSC/hand.html', {'form': form})
+
+@csrf_exempt
+def calculate_score_api(request):
+    if request.method == 'POST':
+        try:
+            hand = Hand.objects.last()
+            condition = Condition.objects.last()
+            result = calculator.calculate_score(hand, condition)
+
+            return JsonResponse({
+                "success": True,
+                "result": {
+                    "han": result.han,
+                    "fu": result.fu,
+                    "point": result.point,
+                    "yaku_list": result.yaku_list,
+                    "error_message": result.error_message,
+                }
+            })
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
+
 
 def score_result_view(request, result_id):
     result = get_object_or_404(ScoreResult, pk=result_id)
