@@ -2,13 +2,13 @@ from msc_project.MSC.logic.object import Yakumann
 from msc_project.MSC.logic.国士無双 import is_kokushi
 from msc_project.MSC.models import Condition
 
-class YakumannPointCalculator:
+class PointCalculator:
     def __init__(self, yakumann_count: int, is_tsumo: bool, is_oya: bool):
         self.yakumann_count = yakumann_count
         self.is_tsumo = is_tsumo
         self.is_oya = is_oya
 
-    def calculate_yakumann(self):
+    def calculate(self):
         result = {
             "hand_type": "",#役満、三倍満など
             "score": ""#実際の合計点数
