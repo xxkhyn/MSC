@@ -21,13 +21,13 @@ class PointCalculator:
 
         #if self.is_tsumo:
         if self.is_oya:
-                result["score"]  = f"{base * 3 * multiplier}"
-                result["hand_type"] = f"{multiplier}倍役満"
+            result["score"]  = f"{base * 3 * multiplier}"
+            result["hand_type"] = f"{multiplier}倍役満"
                 
         else:
                
-                result["score"] =  f"{base * 2 * multiplier}",
-                result["hand_type"] = f"{multiplier}倍役満"
+            result["score"] =  f"{base * 2 * multiplier}"
+            result["hand_type"] = f"{multiplier}倍役満"
                 
         '''else:  # ロン
             total = 48000 * multiplier if self.is_dealer else 32000 * multiplier
