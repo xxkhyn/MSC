@@ -1,9 +1,8 @@
 from django.urls import path
 
-from . import views
+from .views import views
 
 app_name = 'MSC'
-
 urlpatterns = [
     path('', views.index_view, name='index'),
     path('hand_input/', views.hand_input_view, name='hand_input'),
