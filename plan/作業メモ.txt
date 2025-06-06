@@ -19,7 +19,7 @@ calculate_score_apiの返し値（JsonResponse）を受け取り、その内容�
 
 ○班wiki仕上げ（りん）
 
-○技術選定
+○技術選定（りん）
 
 ◯フロント
 ・htmlとcssをそれぞれ別ファイルで書き換えて、かつそれぞれのhtmlに一対一対応でcssを作る。
