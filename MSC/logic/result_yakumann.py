@@ -1,5 +1,41 @@
-from msc_project.MSC.logic.han import Yakumann
-from msc_project.MSC.logic.kokushi import is_kokushi
+from msc_project.MSC.logic.object import Yakumann
+from msc_project.MSC.logic.国士無双 import is_kokushi
+
+class PointCalculator:
+    def __init__(self, yakumann_count: int, is_tsumo: bool, is_oya: bool):
+        self.yakumann_count = yakumann_count
+        self.is_tsumo = is_tsumo
+        self.is_oya = is_oya
+
+    def calculate(self):
+        result = {
+            "hand_type": "",#役満、三倍満など
+            "score": ""#実際の合計点数
+        }
+        if self.yakumann_count <= 0:
+            return {"error": "役満でない場合はこの関数を使えません"}
+
+        base = 16000 
+        multiplier = self.yakumann_count
+
+        #if self.is_tsumo:
+        if self.is_oya:
+                result["score"]  = f"{base * 3 * multiplier}"
+                result["hand_type"] = f"{multiplier}倍役満"
+                
+        else:
+               
+                result["score"] =  f"{base * 2 * multiplier}",
+                result["hand_type"] = f"{multiplier}倍役満"
+                
+        '''else:  # ロン
+            total = 48000 * multiplier if self.is_dealer else 32000 * multiplier
+            return {
+                "total": total,
+                "note": f"{multiplier}倍役満（ロン）"
+            }'''
+
+
 '''class ScoreCalculator:
     def calculate_base_point(han) -> int:
             if self.total_han == 1:
@@ -62,39 +98,3 @@ def calculate_score(han:str,is_tumo:bool,is_oya:bool):
             result["score"] = f"{base*4}"#子でロンした場合
 
     return result'''
-class PointCalculator:
-    def __init__(self, yakumann_count: int, is_tsumo: bool, is_oya: bool):
-        self.yakumann_count = yakumann_count
-        self.is_tsumo = is_tsumo
-        self.is_oya = is_oya
-
-    def calculate(self):
-        result = {
-            "hand_type": "",#役満、三倍満など
-            "score": ""#実際の点数
-        }
-        if self.yakumann_count <= 0:
-            return {"error": "役満でない場合はこの関数を使えません"}
-
-        base = 16000 if not self.is_dealer else 16000
-        multiplier = self.yakumann_count
-
-        if self.is_tsumo:
-            if self.is_oya:
-                result["score"]  = f"{base * 3 * multiplier}"
-                result["hand_type"] = f"{multiplier}倍役満"
-                
-            else:
-               
-                result["score"] =  f"{base * 2 * multiplier}",
-                "from_non_dealer": (base // 2) * multiplier,
-                "total": (base + (base // 2)) * multiplier,
-                "note": f"{multiplier}倍役満（子ツモ）"
-                
-        else:  # ロン
-            total = 48000 * multiplier if self.is_dealer else 32000 * multiplier
-            return {
-                "total": total,
-                "note": f"{multiplier}倍役満（ロン）"
-            }
-
