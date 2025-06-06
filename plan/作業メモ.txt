@@ -61,6 +61,7 @@ commitして確定させてファイルやディレクトリをGitLabサーバ�
 
 ・git pull
 他のメンバーがpushした変更を取り込む
+rebaseあぶない
 
 ・C:\Users\n1013\MSC_project\venv\Scripts\Activate.ps1
 仮想環境アクティベート
