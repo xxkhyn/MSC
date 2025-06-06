@@ -88,9 +88,12 @@ rebaseあぶない
 ・rebaseはやらないで
 
 ・ まとめ（pull前に変更してしまったら）
+まずは  git branch
+そこで出てきたbranchを git pull origin 〇〇←に入れる
+pullするときはgit pull origin 〇〇にしたほうがいいっぽい
 状況	　　　　　　　　対応
 作業を保存したい	　　add → commit → pull
-まだ commit したくない	git stash → pull → git stash pop
+まだ commit したくない（作業途中）	git stash → pull → git stash pop
 pull でコンフリクトした	手動修正 → add → commit
 
 ・C:\Users\n1013\MSC_project\venv\Scripts\Activate.ps1
