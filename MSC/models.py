@@ -37,8 +37,9 @@ class Hand(models.Model):
   # 手牌13枚
   hand_pai = models.JSONField(verbose_name="手牌")
 
-  # 和了牌
+  # 和了牌 
   winning_pai = models.CharField(max_length=3, verbose_name="和了牌") 
+ 
   
   # 副露をしているかどうか
   is_huuro = models.BooleanField(default=False, verbose_name="副露あり")
