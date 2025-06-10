@@ -14,21 +14,21 @@ class PointCalculator:
             "score": ""#実際の合計点数
         }
         if self.yakumann_count <= 0:
-            return {"error": "役満でない場合はこの関数を使えません"}
+            return {"hand_type":"yakumann_error",
+                    "score" : "0"
+                    }
 
         base = 16000 
         multiplier = self.yakumann_count
 
         #if self.is_tsumo:
         if self.is_oya:
-            result["score"]  = f"{base * 3 * multiplier}"
-            result["hand_type"] = f"{multiplier}倍役満"
-                
+            result["score"]  = str(base * 3 * multiplier)     
         else:
                
-            result["score"] =  f"{base * 2 * multiplier}"
-            result["hand_type"] = f"{multiplier}倍役満"
-                
+            result["score"] =  str(base * 2 * multiplier)
+        result["hand_type"] = f"{multiplier}倍役満"
+        return result
         '''else:  # ロン
             total = 48000 * multiplier if self.is_dealer else 32000 * multiplier
             return {
