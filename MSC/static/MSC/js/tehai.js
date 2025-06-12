@@ -25,22 +25,31 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('sendHandToServer called');
     
     const hand = [];
-    tileSlots.forEach(slot => {
-      if (slot.dataset.tile) hand.push(slot.dataset.tile);
-    });
+  tileSlots.forEach(slot => {
+    if (slot.dataset.tile) hand.push(slot.dataset.tile);
+  });
 
-    if (hand.length === 0) {
-      alert("手牌を選択してください。");
-      return;
-    }
+  if (hand.length === 0) {
+    alert("手牌を選択してください。");
+    return;
+  }
 
-    const payload = {
-      hand_pai: hand.join(','),
-      winning_pai: "1m",
-      is_huuro: false,
-      huuro: "",
-      dora_pai: "1z",
-    };
+  if (hand.length < 14) {
+    alert("14枚の牌を選択してください。");
+    return;
+  }
+
+  const winningPai = hand[hand.length - 1];
+  const handPai = hand.slice(0, hand.length - 1);
+
+  const payload = {
+    hand_pai: handPai.join(','),      // 13枚
+    winning_pai: winningPai,          // 最後に選ばれた1枚
+    is_huuro: false,
+    huuro: "",
+    dora_pai: "1z",
+  };
+
 
     console.log('Sending to:', 'http://127.0.0.1:8000/api/hand-input/');
     console.log('Payload:', payload);
