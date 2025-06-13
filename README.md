@@ -28,7 +28,7 @@ venv\Scripts\activate
 （仮想空間侵入）  
 
 #### macOS/Linuxの方
-
+ calculate_score(
 '''bash  
 python3 -m venv venv  
 （仮想空間作成）  
