@@ -3,7 +3,7 @@ from .forms import ConditionForm, HandForm
 from .models import Condition, Hand, ScoreResult
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from MSC.logic import past_calculator, test_calculator
+from MSC.logic import calculator, test_calculator
 import json
 
 def index_view(request):
@@ -90,7 +90,7 @@ def calculate_score_api(request):
             condition = Condition.objects.last()
 
             # 仮の計算結果（ここは仮でよい）
-            result_obj = test_calculator.calculate_score(hand, condition)
+            result_obj = calculator.calculate_score(hand, condition)
 
             # ScoreResult をDBに保存
             score_result = ScoreResult.objects.create(

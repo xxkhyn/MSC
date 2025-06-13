@@ -1,6 +1,7 @@
 import json
 from django.test import TestCase, Client
 from MSC.models import Hand, Condition, ScoreResult
+from MSC.logic import calculator
 
 """条件テスト"""
 class ConditionApiTest(TestCase):
@@ -126,4 +127,5 @@ class ScoreResultApiTest(TestCase):
         self.assertEqual(json_data["fu"], 40)
         self.assertEqual(json_data["point"], 7700)
         self.assertEqual(json_data["yaku_list"], ["立直", "一発", "門前清自摸和"])
+
 
