@@ -3,7 +3,7 @@ from .forms import ConditionForm, HandForm
 from .models import Condition, Hand, ScoreResult
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from MSC.logic import calculator, test_calculator
+from MSC.logic import past_calculator, test_calculator
 import json
 
 def index_view(request):
@@ -89,21 +89,22 @@ def calculate_score_api(request):
             hand = Hand.objects.last()
             condition = Condition.objects.last()
 
-            # こっちが本物のコード
-            # result = calculator.calculate_score(hand, condition)
+            # 仮の計算結果（ここは仮でよい）
+            result_obj = test_calculator.calculate_score(hand, condition)
 
-            # 以下はテスト用のダミーコード
-            result = test_calculator.calculate_score(hand, condition)
+            # ScoreResult をDBに保存
+            score_result = ScoreResult.objects.create(
+                han=result_obj.han,
+                fu=result_obj.fu,
+                point=result_obj.point,
+                yaku_list=result_obj.yaku_list,
+                error_message=result_obj.error_message
+            )
 
+            # result_id を返す
             return JsonResponse({
                 "success": True,
-                "result": {
-                    "han": result.han,
-                    "fu": result.fu,
-                    "point": result.point,
-                    "yaku_list": result.yaku_list,
-                    "error_message": result.error_message,
-                }
+                "result_id": score_result.id
             })
 
         except Exception as e:
