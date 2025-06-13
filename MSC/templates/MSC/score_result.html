@@ -11,10 +11,6 @@
     <div class="container">
         <h1>得点結果</h1>
         
-        <!-- result-idは結果がある場合のみ設置 -->
-        {% if result %}
-            <input type="hidden" id="result-id" value="{{ result.id }}">
-        {% endif %}
         
         <div id="score-area">
             {% if result %}
@@ -40,7 +36,7 @@
             {% endif %}
         </div>
         <input type="hidden" id="result-id" value="{{ result.id|default_if_none:'' }}">
-        <button id="reload-button">再読み込み</button>
+        <button id="reload-button">計算開始</button>
     </div>
     
     <script src="{% static 'MSC/js/score_result.js' %}"></script>
