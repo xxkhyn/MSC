@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const winningPai = hand[hand.length - 1];
-  const handPai = hand.slice(0, hand.length - 1);
+  const handPai = hand
 
   const payload = {
     hand_pai: handPai.join(','),      // 13枚
