@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultIdElement = document.getElementById('result-id'); // この input hidden に入れる
 
     reloadButton.addEventListener('click', () => {
+
         // ① まず /api/score/calculate/ に POST → 計算開始
         fetch('/api/score/calculate/', {
             method: 'POST',

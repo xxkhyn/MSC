@@ -40,13 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const winningPai = hand[hand.length - 1];
-  const handPai = hand
+  const handPai = hand.slice(0, hand.length - 1)
 
   const payload = {
-    hand_pai: handPai.join(','),      // 13枚
+    hand_pai: handPai,      // 13枚
     winning_pai: winningPai,          // 最後に選ばれた1枚
     is_huuro: false,
-    huuro: "",
+    huuro: [],
     dora_pai: "1z",
   };
 
