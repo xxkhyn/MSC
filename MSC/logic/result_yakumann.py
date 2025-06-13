@@ -8,7 +8,7 @@ class PointCalculator:
         self.is_tsumo = is_tsumo
         self.is_oya = is_oya
 
-    def calculate(self):
+    def result_yakumann(self):
         result = {
             "hand_type": "",#役満、三倍満など
             "score": ""#実際の合計点数

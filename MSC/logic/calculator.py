@@ -16,7 +16,7 @@ def calculate_score(Hand, Condition):
         # 点数計算と役判定
 
         # ScoreResultオブジェクトの生成
-
+        
         score_result = ScoreResult.objects.create(
 
         )
