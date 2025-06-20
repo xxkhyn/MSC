@@ -88,31 +88,46 @@ document.addEventListener('DOMContentLoaded', () => {
   // タイル選択のイベントリスナー
   tileImages.forEach(img => {
     img.addEventListener('click', () => {
-      const tileSrc = img.src;
-      const tileCode = img.dataset.tile;
+        const tileSrc = img.src;
+        const tileCode = img.dataset.tile;
 
-      const count = Array.from(tileSlots).filter(slot => slot.dataset.tile === tileCode).length;
-      if (count >= 4) {
-        alert(`「${tileCode}」は4枚までしか選べません`);
-        return;
-      }
-
-      if (tileCode.includes("'")) {
-        const redCount = Array.from(tileSlots).filter(slot => slot.dataset.tile && slot.dataset.tile.includes("'")).length;
-        if (redCount >= 1) {
-          alert('赤牌は1枚までしか選べません');
-          return;
+        // ★★★ 1. 鳴き処理を最優先で呼び出します ★★★
+        // これがないと鳴きが選択できません
+        if (window.handleNaki && window.handleNaki(tileCode, tileSrc)) {
+            return;
         }
-      }
 
-      const emptySlot = findNextEmptySlot();
-      if (emptySlot) {
-        emptySlot.style.backgroundImage = `url(${tileSrc})`;
-        emptySlot.dataset.tile = tileCode;
-        refillAndSort();
-      }
+        // ★★★ 2. 手牌と副露を"合算"して4枚チェックします ★★★
+        const allTilesInHand = Array.from(window.tileSlots).map(s => s.dataset.tile).filter(Boolean);
+        const meldedTiles = (window.meldedSets || []).flatMap(s => s.tiles);
+        const allTiles = allTilesInHand.concat(meldedTiles); // 手牌と副露を結合
+
+        const totalTileCount = allTiles.filter(c => c === tileCode).length;
+        if (totalTileCount >= 4) {
+            alert(`「${tileCode}」は4枚までしか選べません`);
+            return;
+        }
+
+        // ★★★ 3. 赤牌のチェック（こちらも手牌と副露を合算してチェックします） ★★★
+        // 同じ種類の赤牌が既に存在しないか確認します
+        if (tileCode.includes("'")) { // クリックされたのが赤牌の場合
+            if (allTiles.includes(tileCode)) {
+                alert(`その赤牌（${tileCode}）は既に1枚使用しています。`);
+                return;
+            }
+        }
+
+        // ★★★ 4. 手牌に牌を追加する処理 ★★★
+        const emptySlot = Array.from(window.tileSlots).find(slot => !slot.dataset.tile);
+        if (emptySlot) {
+            emptySlot.style.backgroundImage = `url(${tileSrc})`;
+            emptySlot.dataset.tile = tileCode;
+            window.refillAndSort();
+        } else {
+            alert('手牌が一杯です。');
+        }
     });
-  });
+});
 
   // タイルスロットのクリック（削除）
   tileSlots.forEach(slot => {

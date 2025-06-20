@@ -1,148 +1,147 @@
 body {
-    font-family: sans-serif;
-    background: #f0f0f0;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-  }
-  .container {
-    padding: 10px;
-    margin: 0 auto;
-  }
-  .section {
-    margin-bottom: 20px;
-    align-items: center;
-  }
-  .label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    text-align: center;
-  }
-  .btn-group {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    text-align: center;
-  }
-  .btn {
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    text-align: center;
-  }
-  .btn.selected {
-    background: #007aff;
-    color: white;
-    text-align: center;
-  }
-  .counter {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    text-align: center;
-  }
-  .counter input {
-    width: 40px;
-    text-align: center;
-  }
-  .tiles {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 10px;
-    text-align: center;
-  }
-  .tile {
-    width: 36px;
-    height: 50px;
-    background: white;
-    border: 1px solid #aaa;
-    text-align: center;
-    line-height: 50px;
-    font-size: 20px;
-    text-align: center;
-  }
-  .options {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    text-align: center;
-  }
-  .option-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    align-items: center;
-  }
-  .btn-group,
-  .tiles,
-  .options{
-    justify-content: center;
-  }
-   .hand {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    justify-content: center;
-    margin: 10px 0;
-  }
+  font-family: sans-serif;
+  background: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+.container {
+  padding: 10px;
+  margin: 0 auto;
+}
+.section {
+  margin-bottom: 20px;
+  align-items: center;
+}
+.label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-align: center;
+}
+.btn-group {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+.btn {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  text-align: center;
+}
+.btn.selected {
+  background: #007aff;
+  color: white;
+  text-align: center;
+}
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+}
+.counter input {
+  width: 40px;
+  text-align: center;
+}
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+  text-align: center;
+}
+.tile {
+  width: 36px;
+  height: 50px;
+  background: white;
+  border: 1px solid #aaa;
+  text-align: center;
+  line-height: 50px;
+  font-size: 20px;
+  text-align: center;
+}
+.options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+.btn-group,
+.tiles,
+.options {
+  justify-content: center;
+}
+.hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  margin: 10px 0;
+}
+.tile-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+  margin: 10px 0;
+}
+.tile-img {
+  width: 40px;
+  height: 60px;
+  cursor: pointer;
+}
+.tile-img:hover {
+  border-color: #007aff;
+}
+.hand {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+  justify-content: center;
+}
+.tile-slot,
+.hand-slot {
+  width: 36px;
+  height: 50px;
+  border: 1px solid #aaa;
+  background-color: white;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.tile-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 0px; /* グループ間の余白 */
+}
+.hand.right-aligned {
+  justify-content: flex-end; /* 鳴いたときは右詰め */
+}
 
-  .tile-selector{
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    justify-content: center;
-    margin: 10px 0;
-  }
-  
-  .tile-img {
-    width: 40px;
-    height: 60px;
-    cursor: pointer;
-  }
+/* 副露エリア（#fixed-tiles）自体と、その中の副露グループも横並びにする */
+#fixed-tiles {
+  display: flex; /* 副露グループ（.meld-group）を横並びにする */
+  align-items: flex-end;
+  gap: 6px; /* 副露グループ間の隙間を少し広めに設定 */
+  margin-left: 10px; /* 手牌と最初の副露グループの間のマージン */
+}
 
- 
-
-  .tile-img:hover {
-    border-color: #007aff;
-  }
-
-  .hand {
+/* 各副露グループ（ポンやチーの3枚組）の中の牌も横並びにする */
+.meld-group {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 5px;
-    justify-content: center;
-  }
-  .tile-slot,
-  .hand-slot {
-    width: 36px;
-    height: 50px;
-    border: 1px solid #aaa;
-    background-color: white;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-  
-  .tile-group {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 0px; /* グループ間の余白 */
-  }
-
-  .hand.right-aligned {
-    justify-content: flex-end; /* 鳴いたときは右詰め */
-  }
-  
-  .fixed-tiles {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-  }
-  
- 
+    align-items: flex-end;
+    gap: 2px; /* 副露した牌同士のわずかな隙間 */
+}
