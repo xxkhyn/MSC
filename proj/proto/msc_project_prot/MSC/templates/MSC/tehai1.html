@@ -1,0 +1,118 @@
+{% load static %}
+{% comment %}  {% endcomment %}
+  {% csrf_token %}
+  <input type="hidden" name="hand_pai" id="handPaiInput">
+  <input type="hidden" name="winning_pai" id="winningPaiInput">
+  <input type="hidden" name="is_huuro" id="isHuuroInput">
+  <input type="hidden" name="huuro" id="huuroInput">
+  <input type="hidden" name="dora_pai" id="doraInput">
+
+  {% comment %}
+    (type="hidden") = 画面には表示されないフィールド
+    (name) = 登録したい
+  {% endcomment %}
+  <input type="hidden" name="hand_pai" id="handPaiInput">
+  <input type="hidden" name="winning_pai" id="winningPaiInput">
+  <input type="hidden" name="is_huuro" id="isHuuroInput">
+  <input type="hidden" name="huuro" id="huuroInput">
+  <input type="hidden" name="dora_pai" id="doraInput">
+
+<div class="container">
+  <div class="section">
+    <div class="label">ドラ表示牌</div>
+    <div class="tiles">
+      <div class="tile"></div><div class="tile"></div><div class="tile"></div>
+      <div class="tile"></div><div class="tile"></div>
+    </div>
+  </div>
+  <div class="hand-section">選んだ手牌</div>
+  <div class="hand" id="hand">
+    <!-- 13個の空枠。背景画像なし、あとから牌画像を入れる -->
+    <div class="tile-slot" data-index="0"></div>
+    <div class="tile-slot" data-index="1"></div>
+    <div class="tile-slot" data-index="2"></div>
+    <div class="tile-slot" data-index="3"></div>
+    <div class="tile-slot" data-index="4"></div>
+    <div class="tile-slot" data-index="5"></div>
+    <div class="tile-slot" data-index="6"></div>
+    <div class="tile-slot" data-index="7"></div>
+    <div class="tile-slot" data-index="8"></div>
+    <div class="tile-slot" data-index="9"></div>
+    <div class="tile-slot" data-index="10"></div>
+    <div class="tile-slot" data-index="11"></div>
+    <div class="tile-slot" data-index="12"></div>
+    <div class="tile-slot" data-index="13"></div>
+    <!-- 副露（ポン・チーなど）用 -->
+  <div id="fixed-tiles" class="fixed-tiles"></div>
+  </div>
+</div>
+  
+  <div class="section">
+    <div class="btn-group">
+      <button class="btn naki-btn" data-naki="pon">ポン</button>
+      <button class="btn naki-btn" data-naki="chi">チー</button>
+      <button class="btn naki-btn" data-naki="mkan">明槓</button>
+      <button class="btn naki-btn" data-naki="akan">暗槓</button>
+    </div>
+  </div>
+    <div class="tile-selector">
+      <div class="tile-group">
+        <img src="../../static/MSC/images/man1-66-90-l.png" data-tile="1m" class="tile-img" />
+        <img src="../../static/MSC/images/man2-66-90-l.png" data-tile="2m" class="tile-img" />
+        <img src="../../static/MSC/images/man3-66-90-l.png" data-tile="3m" class="tile-img" />
+        <img src="../../static/MSC/images/man4-66-90-l.png" data-tile="4m" class="tile-img" />
+        <img src="../../static/MSC/images/man5-66-90-l.png" data-tile="5m" class="tile-img" />
+        <img src="../../static/MSC/images/aka3-66-90-l.png" data-tile="5'm" class="tile-img" />
+        <img src="../../static/MSC/images/man6-66-90-l.png" data-tile="6m" class="tile-img" />
+        <img src="../../static/MSC/images/man7-66-90-l.png" data-tile="7m" class="tile-img" />
+        <img src="../../static/MSC/images/man8-66-90-l.png" data-tile="8m" class="tile-img" />
+        <img src="../../static/MSC/images/man9-66-90-l.png" data-tile="9m" class="tile-img" />
+      </div>
+      <div class="tile-group">
+        <img src="../../static/MSC/images/pin1-66-90-l.png" data-tile="1p" class="tile-img" />
+        <img src="../../static/MSC/images/pin2-66-90-l.png" data-tile="2p" class="tile-img" />
+        <img src="../../static/MSC/images/pin3-66-90-l.png" data-tile="3p" class="tile-img" />
+        <img src="../../static/MSC/images/pin4-66-90-l.png" data-tile="4p" class="tile-img" />
+        <img src="../../static/MSC/images/pin5-66-90-l.png" data-tile="5p" class="tile-img" />
+        <img src="../../static/MSC/images/aka1-66-90-l.png" data-tile="5'p" class="tile-img" />
+        <img src="../../static/MSC/images/pin6-66-90-l.png" data-tile="6p" class="tile-img" />
+        <img src="../../static/MSC/images/pin7-66-90-l.png" data-tile="7p" class="tile-img" />
+        <img src="../../static/MSC/images/pin8-66-90-l.png" data-tile="8p" class="tile-img" />
+        <img src="../../static/MSC/images/pin9-66-90-l.png" data-tile="9p" class="tile-img" />
+      </div>
+      <div class="tile-group">
+        <img src="../../static/MSC/images/sou1-66-90-l.png" data-tile="1s" class="tile-img" />
+        <img src="../../static/MSC/images/sou2-66-90-l.png" data-tile="2s" class="tile-img" />
+        <img src="../../static/MSC/images/sou3-66-90-l.png" data-tile="3s" class="tile-img" />
+        <img src="../../static/MSC/images/sou4-66-90-l.png" data-tile="4s" class="tile-img" />
+        <img src="../../static/MSC/images/sou5-66-90-l.png" data-tile="5s" class="tile-img" />
+        <img src="../../static/MSC/images/aka2-66-90-l.png" data-tile="5's" class="tile-img" />
+        <img src="../../static/MSC/images/sou6-66-90-l.png" data-tile="6s" class="tile-img" />
+        <img src="../../static/MSC/images/sou7-66-90-l.png" data-tile="7s" class="tile-img" />
+        <img src="../../static/MSC/images/sou8-66-90-l.png" data-tile="8s" class="tile-img" />
+        <img src="../../static/MSC/images/sou9-66-90-l.png" data-tile="9s" class="tile-img" />
+      </div>
+      <div class="tile-group">
+        <img src="../../static/MSC/images/ji1-66-90-l.png" data-tile="z1" class="tile-img" />
+        <img src="../../static/MSC/images/ji3-66-90-l.png" data-tile="z2" class="tile-img" />
+        <img src="../../static/MSC/images/ji2-66-90-l.png" data-tile="z3" class="tile-img" />
+        <img src="../../static/MSC/images/ji4-66-90-l.png" data-tile="z4" class="tile-img" />
+        <img src="../../static/MSC/images/ji5-66-90-l.png" data-tile="z5" class="tile-img" />
+        <img src="../../static/MSC/images/ji6-66-90-l.png" data-tile="z6" class="tile-img" />
+        <img src="../../static/MSC/images/ji7-66-90-l.png" data-tile="z7" class="tile-img" />
+      </div>
+    </div>
+    <div class="section">
+      <button id="reset-button" class="btn">リセット</button>
+    </div>
+  </div>
+
+  <!-- ユーザーがフォームを送信するための送信ボタン-->
+  <div class="section">
+    <button id="submit-hand" class="btn" type="button">送信</button>
+  </div>
+
+
+
+<link rel="stylesheet" href="../../static/MSC/css/style.css" />
+<script src="{% static 'MSC/js/tehai.js' %}"></script>
