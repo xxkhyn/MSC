@@ -1,5 +1,5 @@
 from msc_project.MSC.logic.object.han import Yakumann
-from msc_project.MSC.logic.国士無双.kokushi import is_kokushi
+from msc_project.MSC.logic.国士無双.test_kokushi import is_kokushi
 from msc_project.MSC.models import Condition
 
 class PointCalculator:
@@ -89,7 +89,8 @@ def calculate_score(han:str,is_tumo:bool,is_oya:bool):
     
     if is_tumo:
         if is_oya:
-            result["score"] = f"{base*2}オール"#親でツモった場合
+      
+no changes added to commit (use "git add" and/or "git commit -a")      result["score"] = f"{base*2}オール"#親でツモった場合
         else:
             result["score"] = f"{base},{base*2}"#子でツモった場合
     else:
