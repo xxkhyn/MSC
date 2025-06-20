@@ -25,6 +25,18 @@ class Condition(models.Model):
   seat_wind = models.CharField(max_length=5, choices=WIND_CHOICES, default='east', verbose_name="自風")
   prevalent_wind = models.CharField(max_length=5, choices=WIND_CHOICES, default='east', verbose_name="場風")
 
+  PLAYER_TYPE_CHOICES = [
+    ('parent', '親'),
+    ('child', '子'),
+  ]
+
+  player_type = models.CharField(
+    max_length=6,
+    choices=PLAYER_TYPE_CHOICES,
+    default='child',
+    verbose_name="親 or 子"
+  )
+
   created_at = models.DateTimeField(auto_now_add=True)
 
   def __str__(self):

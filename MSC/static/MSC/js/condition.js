@@ -1,27 +1,43 @@
 // static/MSC/js/jouken.js
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('condition-submit-btn').addEventListener('click', () => {
-    fetch('/api/condition/submit/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCSRFToken()  // 別途CSRF取得関数定義が必要
-      },
-      body: JSON.stringify({
-        is_riichi: true,
-        is_ippatsu: false,
-        prevalent_wind: 'east',
-        seat_wind: 'south'
+    const getSelectedValue = (selector, attribute) => {
+      const btn = document.querySelector(`${selector}.selected`);
+      return btn ? btn.getAttribute(attribute) : null;
+    };
+
+    document.getElementById('condition-submit-btn').addEventListener('click', () => {
+      const playerType = getSelectedValue('.player-type-btn', 'data-player');
+      const riichi = getSelectedValue('.riichi-btn', 'data-riichi');
+      const prevalentWind = getSelectedValue('.wind-btn[data-wind-type="prevalent"]', 'data-wind');
+      const seatWind = getSelectedValue('.wind-btn[data-wind-type="seat"]', 'data-wind');
+      const ippatsu = document.querySelector('.ippatsu-btn.selected')?.textContent === '一発';
+
+      const payload = {
+        is_riichi: riichi === 'riichi',
+        is_double_riichi: riichi === 'double',
+        is_ippatsu: ippatsu,
+        prevalent_wind: prevalentWind,
+        seat_wind: seatWind,
+        player_type: playerType,
+      };
+
+      console.log('送信内容:', payload);
+
+      fetch('/api/condition/submit/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
       })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert("送信成功！");
-      } else {
-        alert("送信失敗：" + data.error);
-      }
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('送信成功！');
+        } else {
+          alert('送信失敗: ' + data.error);
+        }
+      });
     });
   });
-});

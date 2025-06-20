@@ -14,7 +14,7 @@ def index_view(request):
     return render(request, 'MSC/index.html', {
         'hand_form': hand_form,
         'condition_form': condition_form,
-        'result': result,
+        'result': None,
     })
 
 @csrf_exempt
@@ -22,12 +22,14 @@ def condition_submit_api(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print("受信データ：", data)
 
             condition = Condition.objects.create(
                 is_riichi = data.get("is_riichi", False),
                 is_ippatsu=data.get("is_ippatsu", False),
                 prevalent_wind=data.get("prevalent_wind", "east"),
                 seat_wind=data.get("seat_wind", "east"),
+                player_type = data.get("player_type", "parent"),
             )
             return JsonResponse({"success": True, "condition_id": condition.id})
         except Exception as e:
