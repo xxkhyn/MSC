@@ -1,8 +1,10 @@
 from MSC.logic.object.han import YakuCounter
-
+from MSC.models import Condition
+from MSC.logic.calculate_hu import hu_calculate
 import math
 
 class ScoreCalculator:
+    @staticmethod
     def calculate_base_point(han,hu) -> int:
         if han >= 13:
             return 8000  # 役満
