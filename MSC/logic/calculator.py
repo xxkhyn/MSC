@@ -1,6 +1,6 @@
 from MSC.models import ScoreResult
-from MSC.logic.parser import parse_hand
-from MSC.logic.validator import validate_hand
+from MSC.logic.parser.parser import parse_hand
+from MSC.logic.validation.validator import validate_hand
 from MSC.logic.evaluator import evaluate_hand
 
 def calculate_score(hand, condition):

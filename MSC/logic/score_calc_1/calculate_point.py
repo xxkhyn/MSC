@@ -1,6 +1,6 @@
 from MSC.logic.object.han import YakuCounter
 from MSC.models import Condition
-from MSC.logic.calculate_hu import hu_calculate
+from MSC.logic.score_calc_1.calculate_hu import hu_calculate
 import math
 
 class ScoreCalculator:

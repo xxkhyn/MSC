@@ -1,7 +1,7 @@
 from MSC.logic.object.han import Yakumann
 from MSC.logic.国士無双.kokushi import is_kokushi, is_kokushi_13machi, str_to_index
 from MSC.logic.object.tiles import HandProvider, MahjongParser, DataReceiver
-from MSC.logic.result_yakumann import PointCalculator
+from MSC.logic.score_calc_2.result_yakumann import PointCalculator
 from MSC.models import ScoreResult
 from MSC.logic.past_calculator import calculate_score
 import sys
