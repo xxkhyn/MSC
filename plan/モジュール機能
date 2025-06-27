@@ -109,7 +109,42 @@ show_han()
 show_yaku()
 
 
-<<〜モジュール>>
+<<モジュール>>
 !!担当者
-!!仕様
+沼田倫・畑山佳史・風穴倖弥<br>
+
+!!概要
+各モジュールの表示ページ（html）とデザイン（css）、動きやインタラクティブな要素を追加する（Javascript）ファイルを作る<br>
+
 !!ファイルごとの機能
+・<br>
+
+*htlmファイル<br>
+・index.html<br>
+→トップ画面。<br><br>
+・jouken.html<br>
+→条件選択画面。<br><br>
+・score_result.html<br>
+→点数計算結果を表示する画面。<br><br>
+・tehai1.html<br>
+→手牌の選択画面。<br><br>
+
+上記のhtmlファイルは部分テンプレートとして、index.html（/ : ルートパス）にアクセスした際に全て表示されるように設定している。<br><br>
+
+*cssファイル<br>
+・index.css<br>
+→トップ画面のデザインを設定。<br><br>
+・jouken.css<br>
+→条件選択画面のデザインを設定。<br><br>
+・score_result.css<br>
+→点数計算結果を表示する画面のデザインを設定。<br><br>
+・style.css<br>
+
+*javascriptファイル<br>
+・btn.js<br>
+・conditon.js<br>
+・naki.js<br>
+・score.js<br>
+・tehai.js<br>
+
+!!現状のやること・問題点
