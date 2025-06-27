@@ -85,10 +85,35 @@ body {
 }
 
 /* 各オプショングループ（立直・一発など） */
+.option-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  /* ← ここで横詰め＆折り返し */
+  gap: 30px;
+  /* 各項目間の余白 */
+  margin-bottom: 30px;
+}
 .option-group {
   display: flex;
   flex-direction: column;
+  /* ← 縦並びにする */
   align-items: center;
-  gap: 8px;
+  margin-bottom: 20px;
 }
+
+.option-group .label {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.btnn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 

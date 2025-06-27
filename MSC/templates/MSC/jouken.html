@@ -18,24 +18,31 @@
       <button class="btn wind-btn" data-wind-type="seat" data-wind="north">北</button>
     </div>
   </div>
+  <div class="option-row">
+    <div class="option-group">
+      <div class="label">親・子</div>
+      <div class="btnn-group">
+        <button class="btn player-type-btn selected" data-player="parent">親</button>
+        <button class="btn player-type-btn" data-player="child">子</button>
+      </div>
+    </div>
 
-  <div class="option-group">
-    <div class="label">親・子</div>
-    <button class="btn player-type-btn selected" data-player="parent">親</button>
-    <button class="btn player-type-btn" data-player="child">子</button>
-  </div>
+    <div class="option-group">
+      <div class="label">立直</div>
+      <div class="btnn-group">
+        <button class="btn riichi-btn selected" data-riichi="none">なし</button>
+        <button class="btn riichi-btn" data-riichi="riichi">立直</button>
+        <button class="btn riichi-btn" data-riichi="double">ダブル立直</button>
+      </div>
+    </div>
 
-  <div class="option-group">
-    <div class="label">立直</div>
-    <button class="btn riichi-btn selected" data-riichi="none">なし</button>
-    <button class="btn riichi-btn" data-riichi="riichi">立直</button>
-    <button class="btn riichi-btn" data-riichi="double">ダブル立直</button>
-  </div>
-
-  <div class="option-group">
-    <div class="label">一発</div>
-    <button class="btn ippatsu-btn selected">なし</button>
-    <button class="btn ippatsu-btn">一発</button>
+    <div class="option-group">
+      <div class="label">一発</div>
+      <div class="btnn-group">
+        <button class="btn ippatsu-btn selected">なし</button>
+        <button class="btn ippatsu-btn">一発</button>
+      </div>
+    </div>
   </div>
 
   <button id="condition-submit-btn" type="button">送信</button>
@@ -44,4 +51,4 @@
 <script src="../../static/MSC/js/btn.js"></script>
 <script src="{% static 'MSC/js/condition.js' %}"></script>
 
-  
+<link rel="stylesheet" href="{% static 'MSC/css/jouken.css' %}">
