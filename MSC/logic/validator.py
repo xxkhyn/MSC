@@ -1,4 +1,3 @@
-
 def validate_hand(parsed_hand, condition):
     # 例：牌が14枚未満 → エラー
     if len(parsed_hand.tiles) + 1 != 14:

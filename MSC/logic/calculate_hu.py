@@ -1,4 +1,5 @@
 import math
+
 class hu_caluculate:
     def calculate_fu(is_tsumo: bool, is_closed: bool, melds: list, pair_tile: str, wait_type: str, player_wind: str, round_wind: str) -> int:
         fu = 20 if is_tsumo else 30  # 副底符
