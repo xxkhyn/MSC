@@ -32,7 +32,7 @@ class ScoreCalculator:
 
         return result
     @staticmethod
-    def calculate_base_point(han, fu) -> int:
+    def calculate_base_point(han: int, fu: int) -> int:
         if han >= 13:
             return 8000  # 数え役満
         elif han >= 11:
@@ -41,42 +41,59 @@ class ScoreCalculator:
             return 4000  # 倍満
         elif han >= 6:
             return 3000  # 跳満
-        elif han >= 5:
+        elif han >= 5 or (han == 4 and fu >= 40) or (han == 3 and fu >= 70):
             return 2000  # 満貫
-        elif han == 4 and fu >= 40:
-            return 2000
-        elif han == 3 and fu >= 70:
-            return 2000
         else:
-            return fu * (2 ** (2 + han))
+            return fu * (2 ** (2 + han))  # 通常計算
 
     @staticmethod
     def calculate_score(han: int, fu: int, is_tsumo: bool, is_oya: bool):
         base = ScoreCalculator.calculate_base_point(han, fu)
-        base = ScoreCalculator.round_up_100(base)
 
+        # 満貫判定
+        is_mangan = False
         if han >= 13:
             hand_type = "数え役満"
+            base = 8000
+            is_mangan = True
         elif han >= 11:
             hand_type = "三倍満"
+            base = 6000
+            is_mangan = True
         elif han >= 8:
             hand_type = "倍満"
+            base = 4000
+            is_mangan = True
         elif han >= 6:
             hand_type = "跳満"
+            base = 3000
+            is_mangan = True
         elif han >= 5 or (han == 4 and fu >= 40) or (han == 3 and fu >= 70):
             hand_type = "満貫"
             base = 2000
+            is_mangan = True
         else:
             hand_type = f"{han}翻{fu}符"
+            # base は切り上げしない
 
+
+        # 点数計算（支払点は必ず切り上げ）
         if is_tsumo:
-            score_detail = {"oya_all": base * 2} if is_oya else {"ko": base, "oya": base * 2}
-            score_text = f"{base * 2}オール" if is_oya else f"{base},{base * 2}"
+            if is_oya:
+                score_val = ScoreCalculator.round_up_100(base * 2)
+                score_detail = {"oya_all": score_val}
+                score_text = f"{score_val}オール"
+            else:
+                ko_score = ScoreCalculator.round_up_100(base)
+                oya_score = ScoreCalculator.round_up_100(base * 2)
+                score_detail = {"ko": ko_score, "oya": oya_score}
+                score_text = f"{ko_score},{oya_score}"
         else:
-            score_detail = {"ron_score": base * 6 if is_oya else base * 4}
-            score_text = f"{base * 6}" if is_oya else f"{base * 4}"
+            ron_score = ScoreCalculator.round_up_100(base * 6 if is_oya else base * 4)
+            score_detail = {"ron_score": ron_score}
+            score_text = str(ron_score)
 
-        return {   
+        return {
             "base_point": base,
             "hand_type": hand_type,
             "score": score_text,
