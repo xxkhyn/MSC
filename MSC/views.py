@@ -78,6 +78,7 @@ def hand_input_api(request):
             hand = Hand.objects.create(
                 hand_pai=data.get('hand_pai', ''),
                 winning_pai=data.get('winning_pai', ''),
+                is_tsumo=data.get('is_tsumo', True),
                 is_huuro=data.get('is_huuro', False),
                 huuro=data.get('huuro', ''),
                 dora_pai=data.get('dora_pai', '')

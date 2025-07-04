@@ -164,3 +164,13 @@ body {
   border-top: 1px solid #aaa;
   padding-top: 4px;
 }
+.tile-slot.selecting {
+  border-color: #007aff;
+  box-shadow: 0 0 8px rgba(0, 122, 255, 0.7);
+}
+.winning-tile-slot {
+  border: 2px solid #ff4500; /* オレンジ色の枠線 */
+  box-shadow: 0 0 10px rgba(255, 69, 0, 0.7); /* オレンジ色の光彩 */
+  transform: translateY(-4px); /* 少し上に浮かせる */
+  transition: transform 0.2s, box-shadow 0.2s; /* アニメーション効果 */
+}

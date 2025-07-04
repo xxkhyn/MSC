@@ -4,7 +4,6 @@ from django.db import models
 class Condition(models.Model):
   """ユーザーが選択する麻雀の状況条件（リーチ、ツモ、チーなど）を保持するモデル"""
 
-  is_tsumo = models.BooleanField(default=False, verbose_name="ツモ")
   is_riichi = models.BooleanField(default=False, verbose_name="リーチ")
   is_double_riichi = models.BooleanField(default=False, verbose_name="ダブルリーチ")
   is_ippatsu = models.BooleanField(default=False, verbose_name="一発")
@@ -55,7 +54,9 @@ class Hand(models.Model):
 
   # 和了牌 
   winning_pai = models.CharField(max_length=3, verbose_name="和了牌") 
- 
+
+  # ツモ和了かどうか (Trueならツモ、Falseならロン)
+  is_tsumo = models.BooleanField(default=True, verbose_name="ツモ和了")
   
   # 副露をしているかどうか
   is_huuro = models.BooleanField(default=False, verbose_name="副露あり")

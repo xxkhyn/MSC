@@ -112,10 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return response.json();
         })
-        .then(data => {
-            console.log('送信成功:', data);
-            alert('送信成功！');
-        })
+
         .catch(error => {
             console.error('送信エラー:', error);
             alert(`送信に失敗しました: ${error.message}`);
