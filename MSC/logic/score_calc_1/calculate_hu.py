@@ -10,7 +10,7 @@ def calculate_fu(parsed_hand, condition):
     melds = parsed_hand.huuro  # [{'type': 'pon', 'tile': '9m', 'closed': True}, ...]
     pair_tile = parsed_hand.tiles[-2]  # 便宜的に最後から2枚目を雀頭とする（解析ロジック次第で修正）
     wait_type = detect_wait_type(parsed_hand.tiles, parsed_hand.winning_tile)  # 待ち形の判定関数（仮定）
-    player_wind = convert_wind(condition.seat_wind)
+    player_wind = seat_wind(condition.seat_wind)
     round_wind = convert_wind(condition.prevalent_wind)
 
     # 🔸 副底符（基本符）
