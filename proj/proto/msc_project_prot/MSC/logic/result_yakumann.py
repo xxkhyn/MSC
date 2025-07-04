@@ -17,6 +17,10 @@ class PointCalculator:
             return {"hand_type":"yakumann_error",
                     "score" : "0"
                     }
+            return {
+                "hand_type":"yakumann_error",
+                "score":"0"
+            }
 
         base = 16000 
         multiplier = self.yakumann_count
@@ -28,6 +32,13 @@ class PointCalculator:
                
             result["score"] =  str(base * 2 * multiplier)
         result["hand_type"] = f"{multiplier}倍役満"
+            result["score"]  = str(base * 3 * multiplier)
+            result["hand_type"] = f"{multiplier}倍役満"
+                
+        else:
+               
+            result["score"] =  str(base * 2 * multiplier)
+            result["hand_type"] = f"{multiplier}倍役満"
         return result
         '''else:  # ロン
             total = 48000 * multiplier if self.is_dealer else 32000 * multiplier
