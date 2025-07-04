@@ -1,5 +1,5 @@
 from msc_project.MSC.logic.object.han import Yakumann
-from msc_project.MSC.logic.国士無双.test_kokushi import is_kokushi
+from msc_project.MSC.logic.yaku.yaku import is_kokushi
 from msc_project.MSC.models import Condition
 
 class PointCalculator:
