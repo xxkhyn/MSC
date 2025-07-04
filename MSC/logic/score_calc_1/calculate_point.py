@@ -55,28 +55,30 @@ class ScoreCalculator:
         base = ScoreCalculator.calculate_base_point(han, fu)
         base = ScoreCalculator.round_up_100(base)
 
-        result = {
-            "base_point": base,
-            "hand_type": "",
-            "score": ""
-        }
-
         if han >= 13:
-            result["hand_type"] = "数え役満"
+            hand_type = "数え役満"
         elif han >= 11:
-            result["hand_type"] = "三倍満"
+            hand_type = "三倍満"
         elif han >= 8:
-            result["hand_type"] = "倍満"
+            hand_type = "倍満"
         elif han >= 6:
-            result["hand_type"] = "跳満"
-        elif base == 2000:
-            result["hand_type"] = "満貫"
+            hand_type = "跳満"
+        elif han >= 5 or (han == 4 and fu >= 40) or (han == 3 and fu >= 70):
+            hand_type = "満貫"
+            base = 2000
         else:
-            result["hand_type"] = f"{han}翻{fu}符"
+            hand_type = f"{han}翻{fu}符"
 
         if is_tsumo:
-            result["score"] = f"{base * 2}オール" if is_oya else f"{base},{base * 2}"
+            score_detail = {"oya_all": base * 2} if is_oya else {"ko": base, "oya": base * 2}
+            score_text = f"{base * 2}オール" if is_oya else f"{base},{base * 2}"
         else:
-            result["score"] = f"{base * 6}" if is_oya else f"{base * 4}"
+            score_detail = {"ron_score": base * 6 if is_oya else base * 4}
+            score_text = f"{base * 6}" if is_oya else f"{base * 4}"
 
-        return result
+        return {   
+            "base_point": base,
+            "hand_type": hand_type,
+            "score": score_text,
+            "score_detail": score_detail
+        }
