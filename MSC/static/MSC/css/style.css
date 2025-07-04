@@ -7,89 +7,77 @@ body {
   width: 100%;
   height: 100%;
 }
+
 .container {
   padding: 10px;
   margin: 0 auto;
 }
+
 .section {
   margin-bottom: 20px;
   align-items: center;
 }
+
 .label {
   font-weight: bold;
   margin-bottom: 5px;
-  text-align: center;
 }
-.btn-group {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  text-align: center;
-}
+
+/* ボタン共通 */
 .btn {
   background: white;
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 5px 10px;
   cursor: pointer;
-  text-align: center;
 }
+
 .btn.selected {
   background: #007aff;
   color: white;
-  text-align: center;
 }
-.counter {
+
+.btn-group {
   display: flex;
-  align-items: center;
   gap: 5px;
-  text-align: center;
-}
-.counter input {
-  width: 40px;
-  text-align: center;
-}
-.tiles {
-  display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 10px;
-  text-align: center;
-}
-.tile {
-  width: 36px;
-  height: 50px;
-  background: white;
-  border: 1px solid #aaa;
-  text-align: center;
-  line-height: 50px;
-  font-size: 20px;
-  text-align: center;
-}
-.options {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  text-align: center;
-}
-.option-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: center;
-}
-.btn-group,
-.tiles,
-.options {
   justify-content: center;
 }
+
+/* 手牌表示エリア */
 .hand {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* 手牌が途中で折り返されないように設定 */
   gap: 5px;
   justify-content: center;
   margin: 10px 0;
 }
+
+.tile-slot {
+  width: 36px;
+  height: 50px;
+  border: 1px solid #aaa;
+  background-color: white;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* 副露（鳴き）エリア */
+#fixed-tiles {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: 10px;
+}
+
+.meld-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+/* 牌セレクター */
 .tile-selector {
   display: flex;
   flex-direction: column;
@@ -97,72 +85,25 @@ body {
   justify-content: center;
   margin: 10px 0;
 }
+
+.tile-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 0px;
+}
+
 .tile-img {
   width: 40px;
   height: 60px;
   cursor: pointer;
 }
+
 .tile-img:hover {
   border-color: #007aff;
 }
-.hand {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 5px;
-  justify-content: center;
-}
-.tile-slot,
-.hand-slot {
-  width: 36px;
-  height: 50px;
-  border: 1px solid #aaa;
-  background-color: white;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-.tile-group {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 0px; /* グループ間の余白 */
-}
-.hand.right-aligned {
-  justify-content: flex-end; /* 鳴いたときは右詰め */
-}
-
-/* 副露エリア（#fixed-tiles）自体と、その中の副露グループも横並びにする */
-#fixed-tiles {
-  display: flex; /* 副露グループ（.meld-group）を横並びにする */
-  align-items: flex-end;
-  gap: 6px; /* 副露グループ間の隙間を少し広めに設定 */
-  margin-left: 10px; /* 手牌と最初の副露グループの間のマージン */
-}
-
-/* 各副露グループ（ポンやチーの3枚組）の中の牌も横並びにする */
-.meld-group {
-    display: flex;
-    align-items: flex-end;
-    gap: 2px; /* 副露した牌同士のわずかな隙間 */
-}
 
 /* 送信ボタン */
-#condition-submit-btn {
-  display: block;
-  margin: 30px auto 0;
-  padding: 12px 24px;
-  font-size: 16px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-#condition-submit-btn:hover {
-  background-color: #218838;
-}
-
 #submit-hand {
   display: block;
   margin: 30px auto 0;
@@ -177,4 +118,49 @@ body {
 
 #submit-hand:hover {
   background-color: #218838;
+}
+
+/* ★★★ ここからが新しいドラ表示エリア用のスタイル ★★★ */
+
+/* ドラ表示エリア全体 */
+.dora-container {
+  display: flex;
+  flex-direction: column; /* 縦に並べる */
+  align-items: center;
+  gap: 4px; /* 表ドラと裏ドラの間の隙間 */
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #e9e9e9;
+  margin-bottom: 20px;
+}
+
+/* 表ドラ・裏ドラの各行 */
+.dora-row {
+  display: flex;
+  gap: 5px;
+}
+
+/* 個々のドラスロット */
+.dora-slot {
+  width: 36px;
+  height: 50px;
+  border: 1px solid #aaa;
+  background-color: white;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
+/* 選択中のドラスロットをハイライト */
+.dora-slot.selecting {
+  border-color: #007aff;
+  box-shadow: 0 0 8px rgba(0, 122, 255, 0.7);
+}
+
+/* 裏ドラの行と表ドラの行の間に線を引く */
+#ura-dora-indicators {
+  border-top: 1px solid #aaa;
+  padding-top: 4px;
 }

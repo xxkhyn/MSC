@@ -27,9 +27,16 @@ def condition_submit_api(request):
             condition = Condition.objects.create(
                 is_riichi = data.get("is_riichi", False),
                 is_ippatsu=data.get("is_ippatsu", False),
+                is_rinshan=data.get("is_rinshan", False),
+                is_chankan=data.get("is_chankan", False),
+                is_haitei=data.get("is_haitei", False),
+                is_tenho=data.get("is_tenho", False),
                 prevalent_wind=data.get("prevalent_wind", "east"),
                 seat_wind=data.get("seat_wind", "east"),
                 player_type = data.get("player_type", "parent"),
+                kyotaku=int(data.get('kyotaku', 0)),
+                honba=int(data.get('honba', 0)),
+
             )
             return JsonResponse({"success": True, "condition_id": condition.id})
         except Exception as e:

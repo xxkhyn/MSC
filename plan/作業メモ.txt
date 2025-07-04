@@ -86,9 +86,9 @@ rebaseあぶない
 そこで出てきたbranchを git pull origin 〇〇←に入れる
 pullするときはgit pull origin 〇〇にしたほうがいいっぽい
 状況	　　　　　　　　対応
-作業を保存したい	　　add → commit → pull
-まだ commit したくない（作業途中）	git stash → pull → git stash pop
-pull でコンフリクトした	手動修正 → add → commit
+作業を保存したい	　　git stash → pull → git stash pop → add → commit → push
+まだ commit したくない（作業途中）	
+
 
 ・C:\Users\n1013\MSC_project\venv\Scripts\Activate.ps1
 仮想環境アクティベート

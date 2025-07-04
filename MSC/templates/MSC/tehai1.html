@@ -1,33 +1,34 @@
 {% load static %}
-{% comment %}  {% endcomment %}
-  {% csrf_token %}
-  <input type="hidden" name="hand_pai" id="handPaiInput">
-  <input type="hidden" name="winning_pai" id="winningPaiInput">
-  <input type="hidden" name="is_huuro" id="isHuuroInput">
-  <input type="hidden" name="huuro" id="huuroInput">
-  <input type="hidden" name="dora_pai" id="doraInput">
-
-  {% comment %}
-    (type="hidden") = 画面には表示されないフィールド
-    (name) = 登録したい
-  {% endcomment %}
-  <input type="hidden" name="hand_pai" id="handPaiInput">
-  <input type="hidden" name="winning_pai" id="winningPaiInput">
-  <input type="hidden" name="is_huuro" id="isHuuroInput">
-  <input type="hidden" name="huuro" id="huuroInput">
-  <input type="hidden" name="dora_pai" id="doraInput">
+{% csrf_token %}
 
 <div class="container">
+  <!-- ★★★ ここから全面的に変更 ★★★ -->
   <div class="section">
-    <div class="label">ドラ表示牌</div>
-    <div class="tiles">
-      <div class="tile"></div><div class="tile"></div><div class="tile"></div>
-      <div class="tile"></div><div class="tile"></div>
+    <div class="label">ドラ表示牌（クリックして選択）</div>
+    <div class="dora-container">
+      <!-- 表ドラ -->
+      <div class="dora-row" id="omote-dora-indicators">
+        <div class="dora-slot" data-dora-index="0"></div>
+        <div class="dora-slot" data-dora-index="1"></div>
+        <div class="dora-slot" data-dora-index="2"></div>
+        <div class="dora-slot" data-dora-index="3"></div>
+        <div class="dora-slot" data-dora-index="4"></div>
+      </div>
+      <!-- 裏ドラ -->
+      <div class="dora-row" id="ura-dora-indicators">
+        <div class="dora-slot" data-dora-index="5"></div>
+        <div class="dora-slot" data-dora-index="6"></div>
+        <div class="dora-slot" data-dora-index="7"></div>
+        <div class="dora-slot" data-dora-index="8"></div>
+        <div class="dora-slot" data-dora-index="9"></div>
+      </div>
     </div>
   </div>
+  <!-- ★★★ ここまで変更 ★★★ -->
+
   <div class="hand-section">選んだ手牌</div>
   <div class="hand" id="hand">
-    <!-- 13個の空枠。背景画像なし、あとから牌画像を入れる -->
+    <!-- 14個のタイル・スロット -->
     <div class="tile-slot" data-index="0"></div>
     <div class="tile-slot" data-index="1"></div>
     <div class="tile-slot" data-index="2"></div>
@@ -43,7 +44,7 @@
     <div class="tile-slot" data-index="12"></div>
     <div class="tile-slot" data-index="13"></div>
     <!-- 副露（ポン・チーなど）用 -->
-  <div id="fixed-tiles" class="fixed-tiles"></div>
+    <div id="fixed-tiles" class="fixed-tiles"></div>
   </div>
 </div>
   
@@ -55,8 +56,10 @@
       <button class="btn naki-btn" data-naki="akan">暗槓</button>
     </div>
   </div>
-    <div class="tile-selector">
-      <div class="tile-group">
+
+  <div class="tile-selector">
+    <!-- 牌セレクター (変更なし) -->
+    <div class="tile-group">
         <img src="../../static/MSC/images/man1-66-90-l.png" data-tile="1m" class="tile-img" />
         <img src="../../static/MSC/images/man2-66-90-l.png" data-tile="2m" class="tile-img" />
         <img src="../../static/MSC/images/man3-66-90-l.png" data-tile="3m" class="tile-img" />
@@ -67,8 +70,8 @@
         <img src="../../static/MSC/images/man7-66-90-l.png" data-tile="7m" class="tile-img" />
         <img src="../../static/MSC/images/man8-66-90-l.png" data-tile="8m" class="tile-img" />
         <img src="../../static/MSC/images/man9-66-90-l.png" data-tile="9m" class="tile-img" />
-      </div>
-      <div class="tile-group">
+    </div>
+    <div class="tile-group">
         <img src="../../static/MSC/images/pin1-66-90-l.png" data-tile="1p" class="tile-img" />
         <img src="../../static/MSC/images/pin2-66-90-l.png" data-tile="2p" class="tile-img" />
         <img src="../../static/MSC/images/pin3-66-90-l.png" data-tile="3p" class="tile-img" />
@@ -79,8 +82,8 @@
         <img src="../../static/MSC/images/pin7-66-90-l.png" data-tile="7p" class="tile-img" />
         <img src="../../static/MSC/images/pin8-66-90-l.png" data-tile="8p" class="tile-img" />
         <img src="../../static/MSC/images/pin9-66-90-l.png" data-tile="9p" class="tile-img" />
-      </div>
-      <div class="tile-group">
+    </div>
+    <div class="tile-group">
         <img src="../../static/MSC/images/sou1-66-90-l.png" data-tile="1s" class="tile-img" />
         <img src="../../static/MSC/images/sou2-66-90-l.png" data-tile="2s" class="tile-img" />
         <img src="../../static/MSC/images/sou3-66-90-l.png" data-tile="3s" class="tile-img" />
@@ -91,29 +94,26 @@
         <img src="../../static/MSC/images/sou7-66-90-l.png" data-tile="7s" class="tile-img" />
         <img src="../../static/MSC/images/sou8-66-90-l.png" data-tile="8s" class="tile-img" />
         <img src="../../static/MSC/images/sou9-66-90-l.png" data-tile="9s" class="tile-img" />
-      </div>
-      <div class="tile-group">
-        <img src="../../static/MSC/images/ji1-66-90-l.png" data-tile="z1" class="tile-img" />
-        <img src="../../static/MSC/images/ji3-66-90-l.png" data-tile="z2" class="tile-img" />
-        <img src="../../static/MSC/images/ji2-66-90-l.png" data-tile="z3" class="tile-img" />
-        <img src="../../static/MSC/images/ji4-66-90-l.png" data-tile="z4" class="tile-img" />
-        <img src="../../static/MSC/images/ji5-66-90-l.png" data-tile="z5" class="tile-img" />
-        <img src="../../static/MSC/images/ji6-66-90-l.png" data-tile="z6" class="tile-img" />
-        <img src="../../static/MSC/images/ji7-66-90-l.png" data-tile="z7" class="tile-img" />
-      </div>
     </div>
-    <div class="section">
-      <button id="reset-button" class="btn">リセット</button>
+    <div class="tile-group">
+        <img src="../../static/MSC/images/ji1-66-90-l.png" data-tile="z1" class="tile-img" />
+        <img src="../../static/MSC/images/ji2-66-90-l.png" data-tile="z2" class="tile-img" />
+        <img src="../../static/MSC/images/ji3-66-90-l.png" data-tile="z3" class="tile-img" />
+        <img src="../../static/MSC/images/ji4-66-90-l.png" data-tile="z4" class="tile-img" />
+        <img src="../../static/MSC/images/ji6-66-90-l.png" data-tile="z5" class="tile-img" />
+        <img src="../../static/MSC/images/ji5-66-90-l.png" data-tile="z6" class="tile-img" />
+        <img src="../../static/MSC/images/ji7-66-90-l.png" data-tile="z7" class="tile-img" />
     </div>
   </div>
+    
+  <div class="section">
+    <button id="reset-button" class="btn">リセット</button>
+  </div>
 
-  <!-- ユーザーがフォームを送信するための送信ボタン-->
   <div class="section">
     <button id="submit-hand" class="btn" type="button">送信</button>
   </div>
 
-
-
-<link rel="stylesheet" href="../../static/MSC/css/style.css" />
+<link rel="stylesheet" href="{% static 'MSC/css/style.css' %}" />
 <script src="{% static 'MSC/js/test.js' %}"></script>
 <script src="{% static 'MSC/js/naki.js' %}"></script>

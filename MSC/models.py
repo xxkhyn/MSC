@@ -13,7 +13,7 @@ class Condition(models.Model):
   is_haitei = models.BooleanField(default=False, verbose_name="海底")
   is_houtei = models.BooleanField(default=False, verbose_name="河底")
   is_tenho = models.BooleanField(default=False, verbose_name="天和")
-  is_chiho = models.BooleanField(default=False, verbose_name="地和")
+  
 
   WIND_CHOICES = [
         ('east', '東'),
@@ -36,6 +36,10 @@ class Condition(models.Model):
     default='child',
     verbose_name="親 or 子"
   )
+
+  kyotaku = models.PositiveIntegerField(default=0, verbose_name="供託")
+  honba = models.PositiveIntegerField(default=0, verbose_name="積棒")
+
 
   created_at = models.DateTimeField(auto_now_add=True)
 
