@@ -1,38 +1,52 @@
+import sys
+import os
+import django
+
+# melds.py の場所から見て、ルートの絶対パスを追加
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'msc_project.config.settings')
+django.setup()
+
 from collections import Counter
 from typing import List, Tuple
+import copy
+from MSC import models
 
+TILE_TO_INDEX = {
+    **{f"m{i}": i-1 for i in range(1, 10)},
+    **{f"p{i}": 9 + i-1 for i in range(1, 10)},
+    **{f"s{i}": 18 + i-1 for i in range(1, 10)},
+    **{f"z{i}": 27 + i-1 for i in range(1, 8)},
+}
 
+def tile_strs_to_indices(tiles: List[str]) -> List[int]:
+    indices = []
+    for t in tiles:
+        if t not in TILE_TO_INDEX:
+            raise ValueError(f"未知の牌表記: {t}")
+        indices.append(TILE_TO_INDEX[t])
+    return indices
 
 def can_form_agari_numeric(hand: List[int]) -> List[Tuple[List[List[int]], List[int]]]:
-    """h
-    与えられた14枚からアガリ形を列挙的に探索（数値版）
-    戻り値: (面子リスト, 雀頭)
-    """
     results = []
     counts = Counter(hand)
-
     for i in range(34):
         if counts[i] >= 2:
             temp = counts.copy()
             temp[i] -= 2
             if temp[i] == 0:
                 del temp[i]
-
             mentsu_list = []
             if _can_form_mentsu_numeric(temp, mentsu_list):
-                results.append((mentsu_list, [i, i]))
-
+                results.append((copy.deepcopy(mentsu_list), [i, i]))
     return results
-
 
 def _can_form_mentsu_numeric(counts: Counter, result: List[List[int]]) -> bool:
     if not counts:
         return True
-
     tile = min(counts)
     c = counts[tile]
-
-    # 刻子チェック
     if c >= 3:
         result.append([tile] * 3)
         counts[tile] -= 3
@@ -42,8 +56,6 @@ def _can_form_mentsu_numeric(counts: Counter, result: List[List[int]]) -> bool:
             return True
         result.pop()
         counts[tile] += 3
-
-    # 順子チェック（数牌のみ）
     if tile < 27 and tile % 9 <= 6:
         t2 = tile + 1
         t3 = tile + 2
@@ -58,66 +70,48 @@ def _can_form_mentsu_numeric(counts: Counter, result: List[List[int]]) -> bool:
             result.pop()
             for t in [tile, t2, t3]:
                 counts[t] = counts.get(t, 0) + 1
-
     return False
 
-def detect_wait_type_from_agari_numeric(mentsu: List[List[int]], pair: List[int], winning_tile: int) -> str:
-    if pair.count(winning_tile) == 1:
-        return "tanki"
-
-    for m in mentsu:
-        if winning_tile not in m:
-            continue
-        if len(m) != 3:
-            continue
-
-        m_sorted = sorted(m)
-        if m_sorted[0] == m_sorted[1] == m_sorted[2]:
-            continue  # 刻子
-
-        # 順子であることが確定している前提
-        if winning_tile == m_sorted[1]:
-            if m_sorted[0] + 1 == m_sorted[1] and m_sorted[1] + 1 == m_sorted[2]:
-                return "kanchan"
-        if winning_tile == m_sorted[0]:
-            if m_sorted == [1, 2, 3] and winning_tile == 1:
-                return "penchan"
-        if winning_tile == m_sorted[2]:
-            if m_sorted == [7, 8, 9] and winning_tile == 9:
-                return "penchan"
-        if m_sorted[0] + 1 == m_sorted[1] and m_sorted[1] + 1 == m_sorted[2]:
-            return "ryanmen"
-
-    return "unknown"
-
 def parse_huuro_to_melds(huuro_data: List[dict]) -> List[dict]:
-    """
-    Handモデルのhuuro JSONから内部meld形式へ変換。
-    """
     melds = []
-
     for item in huuro_data:
         meld_type = item.get("type")
-        tiles = item.get("tiles", [])
+        tiles_str = item.get("tiles", [])
         is_open = item.get("open", True)
-
+        tiles_num = tile_strs_to_indices(tiles_str)
         if meld_type == "chi":
-            melds.append({
-                "type": "shuntsu",
-                "tiles": tiles,
-                "open": is_open,
-            })
+            melds.append({"type": "shuntsu", "tiles": tiles_num, "open": is_open})
         elif meld_type == "pon":
-            melds.append({
-                "type": "kotsu",
-                "tiles": tiles,
-                "open": is_open,
-            })
+            melds.append({"type": "kotsu", "tiles": tiles_num, "open": is_open})
         elif meld_type == "kan":
-            melds.append({
-                "type": "kan",
-                "tiles": tiles,
-                "open": is_open,
-            })
-
+            melds.append({"type": "kan", "tiles": tiles_num, "open": is_open})
     return melds
+
+def analyze_hand_model(hand_instance: models.Hand) -> dict:
+    hand_numeric = tile_strs_to_indices(hand_instance.hand_pai + [hand_instance.winning_pai])
+    melds = parse_huuro_to_melds(hand_instance.huuro)
+    agari_patterns = can_form_agari_numeric(hand_numeric)
+    return {
+        "agari_patterns": agari_patterns,
+        "melds": melds,
+    }
+
+
+from types import SimpleNamespace
+
+# 擬似的に models.Hand のインスタンスのように振る舞うオブジェクトを作る
+def create_hand_instance(hand_pai, winning_pai, huuro=None):
+    if huuro is None:
+        huuro = []
+    return SimpleNamespace(hand_pai=hand_pai, winning_pai=winning_pai, huuro=huuro)
+
+# 例: テスト用の牌配列
+test_hand_pai = ["m1", "m2", "m3", "p4", "p5", "p6", "s7", "s8", "s9", "z1", "z1", "z2", "z2"]
+test_winning_pai = "z2"
+is_huuro = True
+hand_instance = create_hand_instance(test_hand_pai, test_winning_pai)
+
+# analyze_hand_model関数に渡して結果を取得
+result = analyze_hand_model(hand_instance)
+
+print(result)
