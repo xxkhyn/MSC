@@ -5,37 +5,56 @@ from collections import Counter
 from typing import List, Tuple
 import copy
 
-# melds.py の場所から見て、ルートの絶対パスを追加
+# ルートパスを追加
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'msc_project.config.settings')
 django.setup()
 
+from MSC import models  # Hand モデルを想定
 
-# 手牌オブジェクト内の手牌配列を数値化する
-TILE_TO_INDEX = {
-    **{f"m{i}": i-1 for i in range(1, 10)},
-    **{f"p{i}": 9 + i-1 for i in range(1, 10)},
-    **{f"s{i}": 18 + i-1 for i in range(1, 10)},
-    **{f"z{i}": 27 + i-1 for i in range(1, 8)},
+# 数値 <-> 牌文字 の変換テーブル
+NUMERIC_TO_TILE = {
+    **{i: f"m{i+1}" for i in range(0, 9)},    # 0-8
+    **{i: f"p{i-8}" for i in range(9, 18)},   # 9-17
+    **{i: f"s{i-17}" for i in range(18, 27)}, # 18-26
+    **{i: f"z{i-26}" for i in range(27, 34)}, # 27-33
 }
+TILE_TO_NUMERIC = {v: k for k, v in NUMERIC_TO_TILE.items()}
 
-# 手牌配列を数値化する関数
-# hand_objに格納されている情報を確認したい場合はmodels.pyのHandオブジェクトを参照
+
 def tile_strs_to_indices(hand_obj):
-    
+    """
+    Handオブジェクトの hand_pai だけを数値化する
+    """
     hand_pai = hand_obj.hand_pai
-
     indices = []
-    for t in tiles:
-        if t not in TILE_TO_INDEX:
+    for t in hand_pai:
+        if t not in TILE_TO_NUMERIC:
             raise ValueError(f"未知の牌表記: {t}")
-        indices.append(TILE_TO_INDEX[t])
+        indices.append(TILE_TO_NUMERIC[t])
     return indices
 
-def can_form_agari_numeric(hand: List[int]) -> List[Tuple[List[List[int]], List[int]]]:
+
+def all_tiles_to_indices(hand_obj):
+    """
+    Handオブジェクトの hand_pai + winning_pai をまとめて数値化する
+    """
+    tiles = hand_obj.hand_pai + [hand_obj.winning_pai]
+    indices = []
+    for t in tiles:
+        if t not in TILE_TO_NUMERIC:
+            raise ValueError(f"未知の牌表記: {t}")
+        indices.append(TILE_TO_NUMERIC[t])
+    return indices
+
+
+def can_form_agari_numeric(hand_obj):
+    """
+    手牌と和了牌から和了形を探す
+    """
+    indices = all_tiles_to_indices(hand_obj)
     results = []
-    counts = Counter(hand)
+    counts = Counter(indices)
     for i in range(34):
         if counts[i] >= 2:
             temp = counts.copy()
@@ -47,12 +66,15 @@ def can_form_agari_numeric(hand: List[int]) -> List[Tuple[List[List[int]], List[
                 results.append((copy.deepcopy(mentsu_list), [i, i]))
     return results
 
+
 def _can_form_mentsu_numeric(counts: Counter, result: List[List[int]]) -> bool:
+    """
+    再帰的に順子・刻子を構成できるか判定する
+    """
     if not counts:
         return True
     tile = min(counts)
-    c = counts[tile]
-    if c >= 3:
+    if counts[tile] >= 3:
         result.append([tile] * 3)
         counts[tile] -= 3
         if counts[tile] == 0:
@@ -64,7 +86,7 @@ def _can_form_mentsu_numeric(counts: Counter, result: List[List[int]]) -> bool:
     if tile < 27 and tile % 9 <= 6:
         t2 = tile + 1
         t3 = tile + 2
-        if counts.get(t2, 0) > 0 and counts.get(t3, 0) > 0:
+        if counts.get(t2, 0) and counts.get(t3, 0):
             for t in [tile, t2, t3]:
                 counts[t] -= 1
                 if counts[t] == 0:
@@ -77,36 +99,68 @@ def _can_form_mentsu_numeric(counts: Counter, result: List[List[int]]) -> bool:
                 counts[t] = counts.get(t, 0) + 1
     return False
 
-def parse_huuro_to_melds(huuro_data: List[dict]) -> List[dict]:
+
+def parse_huuro_to_melds(hand_obj):
+    """
+    Handオブジェクトの huuro を数値に変換
+    """
     melds = []
-    for item in huuro_data:
+    for item in hand_obj.huuro:
         meld_type = item.get("type")
         tiles_str = item.get("tiles", [])
         is_open = item.get("open", True)
-        tiles_num = tile_strs_to_indices(tiles_str)
-        if meld_type == "chi":
-            melds.append({"type": "shuntsu", "tiles": tiles_num, "open": is_open})
-        elif meld_type == "pon":
-            melds.append({"type": "kotsu", "tiles": tiles_num, "open": is_open})
-        elif meld_type == "kan":
-            melds.append({"type": "kan", "tiles": tiles_num, "open": is_open})
+        tiles_num = [TILE_TO_NUMERIC[t] for t in tiles_str]
+        melds.append({
+            "type": meld_type,
+            "tiles": tiles_num,
+            "open": is_open
+        })
     return melds
 
-from types import SimpleNamespace
 
-# 擬似的に models.Hand のインスタンスのように振る舞うオブジェクトを作る
-def create_hand_instance(hand_pai, winning_pai, huuro=None):
-    if huuro is None:
-        huuro = []
-    return SimpleNamespace(hand_pai=hand_pai, winning_pai=winning_pai, huuro=huuro)
 
-# 例: テスト用の牌配列
-test_hand_pai = ["m1", "m2", "m3", "p4", "p5", "p6", "s7", "s8", "s9", "z1", "z1", "z2", "z2"]
-test_winning_pai = "z2"
-is_huuro = True
-hand_instance = create_hand_instance(test_hand_pai, test_winning_pai)
+def describe_mentsu(mentsu: dict) -> str:
+    """
+    面子 dict を説明用の文字列にする
+    """
+   
+    
+    tiles = mentsu["tiles"]
+    type_ = mentsu["type"]
+    open_ = mentsu.get("open", False)
 
-# analyze_hand_model関数に渡して結果を取得
-result = analyze_hand_model(hand_instance)
+    tile_strs = [NUMERIC_TO_TILE[i] for i in tiles]
+    main_tile = tile_strs[0]
 
-print(result)
+    if type_ == "kotsu":
+        type_name = "刻子"
+    elif type_ == "kan":
+        type_name = "槓子"
+    elif type_ == "shuntsu":
+        type_name = "順子"
+    else:
+        type_name = "不明"
+
+    open_str = ""
+    if type_ in {"kotsu", "kan"}:
+        open_str = "(鳴き)" if open_ else "(暗刻)"
+    elif type_ == "shuntsu" and open_:
+        open_str = "(鳴き)"
+
+    return f"{main_tile}{type_name}{open_str}"
+
+
+def mentsu_to_dict(mentsu_tiles):
+        # 刻子・順子を判別
+        if len(mentsu_tiles) == 3:
+            if mentsu_tiles[0] == mentsu_tiles[1] == mentsu_tiles[2]:
+                type_ = "kotsu"
+            elif mentsu_tiles[0] +1 == mentsu_tiles[1] and mentsu_tiles[1] +1 == mentsu_tiles[2]:
+                type_ = "shuntsu"
+            else:
+                type_ = "不明"
+        elif len(mentsu_tiles) == 4 and len(set(mentsu_tiles)) == 1:
+            type_ = "kan"
+        else:
+            type_ = "不明"
+        return {"type": type_, "tiles": mentsu_tiles, "open": False}

@@ -1,38 +1,40 @@
+import copy
 import parse_def
-
-class ParsedHand:
-
-    def __init__(self, tiles, winning_tile, huuro, dora):
-        self.tiles = tiles
-        self.winning_tile = winning_tile
-        self.huuro = huuro
-        self.dora = dora
-
-"""analyze_hand_modelを引き出せばmodelsのすべての処理を引き出せる
-    手牌の解析（アガれる形かどうか・面子構成の確認・）
-    手牌配列と副露が別で送られてくるので、副露の情報を反映させつつ
-    副露を含めた手牌を送る。
-
-    返し値：
-    解析済み手牌・アガれなかった場合のエラーアメッセージ
-"""
-
+from types import SimpleNamespace
 def analyze_hand_model(hand_obj):
+    hand_numeric = parse_def.tile_strs_to_indices(hand_obj)
+    melds = parse_def.parse_huuro_to_melds(hand_obj)
+    agari_patterns = parse_def.can_form_agari_numeric(hand_obj)
+    mentsu_to_dict = parse_def.mentsu_to_dict 
+    if not agari_patterns:
+        return {
+            "agari_patterns": [],
+            "melds": melds,
+            "melds_descriptions": [],
+            "error_message": "和了形が作れません。牌が不足しているか、面子が作れません。"
+        }
 
-    hand_numeric = parse_def.tile_strs_to_indices(hand_obj.hand_pai, hand_obj.winning_pai)
-    melds = parse_def.parse_huuro_to_melds(hand_obj.huuro)
-    agari_patterns = parse_def.can_form_agari_numeric(hand_numeric)
+    first_pattern = agari_patterns[0][0]
+
+    melds_descriptions = [parse_def.describe_mentsu(mentsu_to_dict(m)) for m in first_pattern]
 
     return {
         "agari_patterns": agari_patterns,
         "melds": melds,
+        "melds_descriptions": melds_descriptions,
+        "error_message": ""
     }
+#test用データ
+hand_obj = SimpleNamespace(
+    hand_pai=["s1","s2","s3","p1","p1","p1","s7","s8","s9","z1","z1","z2","z2"],
+    winning_pai="z2",
+    huuro=[],
+    dora_pai=[]
+)
 
-def parse_hand(hand_obj):
+result = analyze_hand_model(hand_obj)
 
-    return ParsedHand(
-        tiles=hand_obj.hand_pai,
-        winning_tile=hand_obj.winning_pai,
-        huuro=hand_obj.huuro,
-        dora=hand_obj.dora_pai
-    )
+print("Agari Patterns:", result["agari_patterns"])
+print("Melds:", result["melds"])
+print("Melds Descriptions:", result["melds_descriptions"])
+print("Error Message:", result["error_message"])
