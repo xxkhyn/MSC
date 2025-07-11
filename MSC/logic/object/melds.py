@@ -20,6 +20,7 @@ TILE_TO_INDEX = {
     **{f"z{i}": 27 + i-1 for i in range(1, 8)},
 }
 
+
 def tile_strs_to_indices(tiles: List[str]) -> List[int]:
     indices = []
     for t in tiles:
