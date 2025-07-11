@@ -1,8 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     const reloadButton = document.getElementById('reload-button');
-    const resultIdElement = document.getElementById('result-id'); // この input hidden に入れる
+    const resultIdElement = document.getElementById('result-id');
+    const scoreArea = document.getElementById('score-area'); // 先に要素を取得
+
+    // ★★★ ページが読み込まれた時に、結果表示エリアを空にする ★★★
+    scoreArea.innerHTML = '';
 
     reloadButton.addEventListener('click', () => {
+
+        // (任意) ユーザー体験向上のため、計算中にメッセージを表示する
+        scoreArea.innerHTML = '<p>計算中...</p>';
 
         // ① まず /api/score/calculate/ に POST → 計算開始
         fetch('/api/score/calculate/', {
@@ -10,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({}) // 今は空のPOSTでOK（hand, conditionはサーバ側で last() を取得している）
+            body: JSON.stringify({})
         })
         .then(response => {
             if (!response.ok) throw new Error('Network response was not OK');
@@ -20,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 const resultId = data.result_id;
                 console.log(`取得した result_id: ${resultId}`);
-                resultIdElement.value = resultId; // input hidden にセットする（再読込用に保持）
+                resultIdElement.value = resultId;
 
                 // ② 取得した result_id で /api/score/result/<result_id>/ をGET
                 return fetch(`/api/score/result/${resultId}/`);
@@ -34,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
             // ③ 結果を画面に反映
-            const scoreArea = document.getElementById('score-area');
             if (data.error_message) {
                 scoreArea.innerHTML = `<div class="error"><p>⚠ エラー: ${data.error_message}</p></div>`;
             } else {
@@ -55,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(error => {
-            const scoreArea = document.getElementById('score-area');
             scoreArea.innerHTML = `<div class="error"><p>⚠ データ取得エラー: ${error.message}</p></div>`;
         });
     });

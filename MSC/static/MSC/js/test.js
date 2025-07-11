@@ -1,4 +1,4 @@
-// tehai.js (ハイライト修正版)
+// tehai.js (最終版)
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- グローバル変数 ---
@@ -6,20 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedDoraTiles = new Array(10).fill(null);
     let activeHandSlot = null;
 
-    // --- ★★★ ここからが修正箇所 ★★★ ---
-    /**
-     * アガリ牌のハイライトを更新するグローバル関数
-     */
-    window.updateWinningTileHighlight = function() {
-        // まず全てのスロットからハイライトを消す
-        window.tileSlots.forEach(slot => slot.classList.remove('winning-tile-slot'));
+    // --- グローバルに公開する変数と関数 ---
+    window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
 
-        // 牌の合計枚数を計算
+    window.updateWinningTileHighlight = function() {
+        window.tileSlots.forEach(slot => slot.classList.remove('winning-tile-slot'));
         const handTilesCount = Array.from(window.tileSlots).filter(s => s.dataset.tile).length;
         const meldedTilesCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
         const totalTiles = handTilesCount + meldedTilesCount;
 
-        // 合計が14枚の時だけ、一番右の牌をハイライトする
         if (totalTiles === 14) {
             const filledSlots = Array.from(window.tileSlots).filter(s => s.dataset.tile);
             if (filledSlots.length > 0) {
@@ -28,10 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    // ★★★ 修正ここまで ★★★
 
-    // --- グローバルに公開する変数と関数 ---
-    window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
     window.refillAndSort = function() {
         const tiles = [];
         window.tileSlots.forEach(slot => {
@@ -44,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const suitOrder = { m: 1, p: 2, s: 3, z: 4 };
-
         function normalize(tileCode) {
             if (!tileCode) return null;
             if (/^[1-9]'?[mps]$/.test(tileCode)) {
@@ -78,17 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 slot.style.cursor = 'default';
             }
         });
-
-        // ソート後にハイライトを更新
         window.updateWinningTileHighlight();
     };
 
-    // (省略: DOM取得, CSRFトークン, sendHandToServer は変更なし)
+    // --- DOM取得とCSRFトークン ---
     const tileImages = document.querySelectorAll('.tile-img');
     const resetButton = document.getElementById('reset-button');
     const submitButton = document.getElementById('submit-hand');
     const doraSlots = document.querySelectorAll('.dora-slot');
     const isTsumoCheckbox = document.getElementById('is-tsumo-checkbox');
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -104,6 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return cookieValue;
     }
     const csrftoken = getCookie('csrftoken');
+
+    // --- サーバーへのデータ送信関数 ---
     function sendHandToServer() {
         if (activeHandSlot) {
             activeHandSlot.classList.remove('selecting');
@@ -113,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.tileSlots.forEach(slot => {
             if (slot.dataset.tile) handPai.push(slot.dataset.tile);
         });
+
         const meldedTilesCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
         const totalTiles = handPai.length + meldedTilesCount;
         if (totalTiles === 0) {
@@ -123,19 +116,22 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`牌が${totalTiles}枚しかありません。14枚の牌を選択してください。`);
             return;
         }
+
         const winningPai = handPai.pop();
+
         const payload = {
-            hand_pai: handPai,
-            winning_pai: winningPai,
+            hand_pai: JSON.stringify(handPai),
+            winning_pai: winningPai || '',
             is_tsumo: isTsumoCheckbox.checked,
             is_huuro: window.meldedSets && window.meldedSets.length > 0,
-            huuro: window.meldedSets || [],
-            dora_pai: selectedDoraTiles.filter(tile => tile !== null),
+            huuro: JSON.stringify(window.meldedSets || []),
+            dora_pai: JSON.stringify(selectedDoraTiles.filter(tile => tile !== null)),
         };
+
         console.log('送信するデータ:', payload);
         fetch('/api/hand-input/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken, },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
             body: JSON.stringify(payload),
         })
         .then(response => {
@@ -154,6 +150,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function sendEmptyStateToServer() {
+        const payload = {
+            hand_pai: '[]',
+            winning_pai: '',
+            is_tsumo: true,
+            is_huuro: false,
+            huuro: '[]',
+            dora_pai: '[]'
+        };
+
+        console.log('空の状態をサーバーに送信します。');
+        fetch('/api/hand-input/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify(payload),
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('サーバー側の状態をクリアしました。');
+            } else {
+                response.text().then(text => {
+                   console.error('サーバー側の状態クリアに失敗しました:', text);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('状態クリアのための通信エラー:', error);
+        });
+    }
 
     // --- イベントリスナー ---
     function updateEmptyHandHighlight() {
@@ -187,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             delete slot.dataset.tile;
             slot.classList.remove('selecting');
             activeHandSlot = null;
-            window.refillAndSort(); // この中でハイライトも更新される
+            window.refillAndSort();
         } else if (slot.dataset.tile) {
             if (activeHandSlot) {
                 activeHandSlot.classList.remove('selecting');
@@ -209,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedDoraTiles[doraIndex] = null;
                 slot.style.backgroundImage = '';
                 if (activeDoraSlot === slot) {
-                    slot.classList.remove('selecting');
+                    activeDoraSlot.classList.remove('selecting');
                     activeDoraSlot = null;
                 }
             } else {
@@ -220,10 +245,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // 牌クリックのイベントリスナー (asyncに変更)
     tileImages.forEach(img => {
-        img.addEventListener('click', () => {
+        img.addEventListener('click', async () => {
             const tileSrc = img.src;
             const tileCode = img.dataset.tile;
+
+            // 牌の選択枚数チェック
+            const isRedFive = tileCode.includes("'");
             const handTiles = Array.from(window.tileSlots).map(s => s.dataset.tile).filter(Boolean);
             const meldTiles = (window.meldedSets || []).flatMap(s => s.tiles);
             let doraTiles = selectedDoraTiles.filter(tile => tile !== null);
@@ -232,15 +261,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 doraTiles = selectedDoraTiles.filter((tile, index) => tile !== null && index !== doraIndex);
             }
             const allCurrentTiles = handTiles.concat(meldTiles).concat(doraTiles);
-            const currentTileCount = allCurrentTiles.filter(c => c === tileCode).length;
-            if (currentTileCount >= 4) {
-                alert(`「${tileCode}」は既に4枚選択されています。`);
-                if (activeDoraSlot) {
-                    activeDoraSlot.classList.remove('selecting');
-                    activeDoraSlot = null;
-                }
+            const normalVersion = tileCode.replace("'", "");
+            const redVersion = `5'${normalVersion.slice(-1)}`;
+            const countOfNormal = allCurrentTiles.filter(c => c === normalVersion).length;
+            const countOfRed = allCurrentTiles.filter(c => c === redVersion).length;
+
+            if (countOfNormal + countOfRed >= 4) {
+                alert(`「${normalVersion.slice(0, -1)}」牌は既に4枚選択されています。`);
+                if (activeDoraSlot) { activeDoraSlot.classList.remove('selecting'); activeDoraSlot = null; }
                 return;
             }
+            if (isRedFive && countOfRed >= 1) {
+                alert(`赤ドラの「${tileCode}」は1枚しか選択できません。`);
+                if (activeDoraSlot) { activeDoraSlot.classList.remove('selecting'); activeDoraSlot = null; }
+                return;
+            }
+
             if (activeDoraSlot) {
                 activeDoraSlot.style.backgroundImage = `url(${tileSrc})`;
                 const doraIndex = parseInt(activeDoraSlot.dataset.doraIndex, 10);
@@ -249,14 +285,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeDoraSlot = null;
                 return;
             }
-            if (window.handleNaki && window.handleNaki(tileCode, tileSrc)) {
+
+            // handleNakiの呼び出しをawaitに変更
+            if (window.handleNaki && await window.handleNaki(tileCode, tileSrc)) {
                 return;
             }
+
             const emptySlot = Array.from(window.tileSlots).find(slot => !slot.dataset.tile);
             if (emptySlot) {
                 emptySlot.style.backgroundImage = `url(${tileSrc})`;
                 emptySlot.dataset.tile = tileCode;
-                window.refillAndSort(); // この中でハイライトも更新される
+                window.refillAndSort();
                 updateEmptyHandHighlight();
             } else {
                 alert('手牌が一杯です。');
@@ -264,9 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- 初期化処理 ---
     window.addClickToSelectHandlers();
     updateEmptyHandHighlight();
-    window.updateWinningTileHighlight(); // 初期読み込み時にも実行
+    window.updateWinningTileHighlight();
 
     resetButton.addEventListener('click', () => {
         if (window.resetNakiState) {
@@ -295,11 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
         window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
         window.addClickToSelectHandlers();
         updateEmptyHandHighlight();
-        window.updateWinningTileHighlight(); // リセット後にも実行
+        window.updateWinningTileHighlight();
+        sendEmptyStateToServer();
     });
 
     submitButton.addEventListener('click', (event) => {
         event.preventDefault();
         sendHandToServer();
     });
+
+    resetButton.click();
 });

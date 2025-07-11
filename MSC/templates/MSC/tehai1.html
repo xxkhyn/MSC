@@ -56,7 +56,7 @@
   </div>
 
   <div class="tile-selector">
-    <!-- 牌セレクター (変更なし) -->
+    <!-- 牌セレクター (マンズ) -->
     <div class="tile-group">
         <img src="{% static 'MSC/images/man1-66-90-l.png' %}" data-tile="1m" class="tile-img" />
         <img src="{% static 'MSC/images/man2-66-90-l.png' %}" data-tile="2m" class="tile-img" />
@@ -69,6 +69,7 @@
         <img src="{% static 'MSC/images/man8-66-90-l.png' %}" data-tile="8m" class="tile-img" />
         <img src="{% static 'MSC/images/man9-66-90-l.png' %}" data-tile="9m" class="tile-img" />
     </div>
+    <!-- 牌セレクター (ピンズ) -->
     <div class="tile-group">
         <img src="{% static 'MSC/images/pin1-66-90-l.png' %}" data-tile="1p" class="tile-img" />
         <img src="{% static 'MSC/images/pin2-66-90-l.png' %}" data-tile="2p" class="tile-img" />
@@ -81,6 +82,7 @@
         <img src="{% static 'MSC/images/pin8-66-90-l.png' %}" data-tile="8p" class="tile-img" />
         <img src="{% static 'MSC/images/pin9-66-90-l.png' %}" data-tile="9p" class="tile-img" />
     </div>
+    <!-- 牌セレクター (ソウズ) -->
     <div class="tile-group">
         <img src="{% static 'MSC/images/sou1-66-90-l.png' %}" data-tile="1s" class="tile-img" />
         <img src="{% static 'MSC/images/sou2-66-90-l.png' %}" data-tile="2s" class="tile-img" />
@@ -93,6 +95,7 @@
         <img src="{% static 'MSC/images/sou8-66-90-l.png' %}" data-tile="8s" class="tile-img" />
         <img src="{% static 'MSC/images/sou9-66-90-l.png' %}" data-tile="9s" class="tile-img" />
     </div>
+    <!-- 牌セレクター (字牌) -->
     <div class="tile-group">
         <img src="../../static/MSC/images/ji1-66-90-l.png" data-tile="z1" class="tile-img" />
         <img src="../../static/MSC/images/ji2-66-90-l.png" data-tile="z2" class="tile-img" />
@@ -108,7 +111,6 @@
     <button id="reset-button" class="btn">リセット</button>
   </div>
 
-  <!-- ★★★ ここから追加 ★★★ -->
   <div class="section">
     <div class="options">
       <label>
@@ -117,11 +119,23 @@
       </label>
     </div>
   </div>
-  <!-- ★★★ 追加ここまで ★★★ -->
 
   <div class="section">
     <button id="submit-hand" class="btn" type="button">送信</button>
   </div>
+
+<!-- ★★★ ここからが追加箇所 ★★★ -->
+<!-- 赤ドラ選択用モーダルウィンドウ -->
+<div id="red-five-selection-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <p id="modal-message">このチーに赤5を使用しますか？</p>
+    <div class="modal-buttons">
+      <button id="use-normal-btn">通常の5を使う</button>
+      <button id="use-red-btn">赤5を使う</button>
+    </div>
+  </div>
+</div>
+<!-- ★★★ 追加ここまで ★★★ -->
 
 <link rel="stylesheet" href="{% static 'MSC/css/style.css' %}" />
 <script src="{% static 'MSC/js/test.js' %}"></script>

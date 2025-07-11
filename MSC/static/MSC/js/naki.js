@@ -1,4 +1,4 @@
-// naki.js (ハイライト修正版)
+// naki.js (最終版)
 
 // グローバルスコープに鳴きデータを定義
 window.meldedSets = [];
@@ -9,6 +9,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const nakiButtons = document.querySelectorAll('.naki-btn');
     const tileImagesForNaki = document.querySelectorAll('.tile-img');
     const handContainer = document.getElementById('hand');
+
+    // --- モーダル関連の要素とロジック ---
+    const modal = document.getElementById('red-five-selection-modal');
+    const normalBtn = document.getElementById('use-normal-btn');
+    const redBtn = document.getElementById('use-red-btn');
+    let resolvePromise = null;
+
+    function askForRedFive(tileSuit) {
+        return new Promise(resolve => {
+            resolvePromise = resolve;
+            modal.style.display = 'flex';
+            normalBtn.dataset.value = `5${tileSuit}`;
+            redBtn.dataset.value = `5'${tileSuit}`;
+        });
+    }
+
+    normalBtn.addEventListener('click', () => {
+        if (resolvePromise) {
+            resolvePromise(normalBtn.dataset.value);
+            modal.style.display = 'none';
+            resolvePromise = null;
+        }
+    });
+
+    redBtn.addEventListener('click', () => {
+        if (resolvePromise) {
+            const redTileCode = redBtn.dataset.value;
+            const allTilesInHand = Array.from(window.tileSlots).map(s => s.dataset.tile).filter(Boolean);
+            const meldedTiles = (window.meldedSets || []).flatMap(s => s.tiles);
+            const doraTiles = (window.selectedDoraTiles || []).filter(Boolean);
+            const allCurrentTiles = allTilesInHand.concat(meldedTiles, doraTiles);
+            if (allCurrentTiles.includes(redTileCode)) {
+                alert(`赤ドラの「${redTileCode}」は既に使われています。`);
+                return;
+            }
+            resolvePromise(redTileCode);
+            modal.style.display = 'none';
+            resolvePromise = null;
+        }
+    });
 
     // --- イベントリスナー ---
     nakiButtons.forEach(btn => {
@@ -23,8 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- tehai.jsから呼び出されるメイン関数 ---
-    window.handleNaki = function(tileCode, tileSrc) {
+    // --- tehai.jsから呼び出されるメイン関数 (asyncに変更) ---
+    window.handleNaki = async function(tileCode, tileSrc) {
         if (!currentNaki) {
             return false;
         }
@@ -34,50 +74,89 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
-        const allTilesInHand = Array.from(window.tileSlots).map(s => s.dataset.tile).filter(Boolean);
-        const meldedTiles = (window.meldedSets || []).flatMap(s => s.tiles);
-        const allCurrentTiles = allTilesInHand.concat(meldedTiles);
-        const getCount = (code) => allCurrentTiles.filter(c => c === code).length;
-
-        if (currentNaki === 'pon') {
-            if (getCount(tileCode) > 1) {
-                alert(`「${tileCode}」を既に2枚以上持っているため、ポンはできません。`);
-                currentNaki = null;
-                return true;
-            }
-        } else if (currentNaki === 'mkan' || currentNaki === 'akan') {
-            if (getCount(tileCode) > 0) {
-                alert(`「${tileCode}」を既に持っているため、カンはできません。`);
-                currentNaki = null;
-                return true;
-            }
-        } else if (currentNaki === 'chi') {
-            const suit = tileCode.slice(-1);
-            const num = parseInt(tileCode[0], 10);
-            if (suit === 'z' || num >= 8) {
-                alert('その牌からはチーできません。');
-                currentNaki = null;
-                return true;
-            }
-            const tile1 = tileCode;
-            const tile2 = getNextTileCode(tileCode, 1);
-            const tile3 = getNextTileCode(tileCode, 2);
-            if (getCount(tile1) >= 4 || getCount(tile2) >= 4 || getCount(tile3) >= 4) {
-                alert(`チーを構成する牌（${tile1}, ${tile2}, ${tile3}）の中に、既に4枚あるものが含まれています。`);
-                currentNaki = null;
-                return true;
-            }
+        const isRedFive = tileCode.includes("'");
+        if (isRedFive && currentNaki !== 'chi') {
+            alert('赤ドラはチー以外で鳴くことはできません。');
+            currentNaki = null;
+            return true;
         }
 
-        if (currentNaki === 'pon') handlePon(tileCode);
-        else if (currentNaki === 'chi') handleChi(tileCode);
-        else if (currentNaki === 'mkan') handleMkan(tileCode);
-        else if (currentNaki === 'akan') handleAkan(tileCode);
+        let nakiHandled = false;
+        if (currentNaki === 'pon') {
+            handlePon(tileCode);
+            nakiHandled = true;
+        } else if (currentNaki === 'chi') {
+            await handleChi(tileCode); // handleChiの完了を待つ
+            nakiHandled = true;
+        } else if (currentNaki === 'mkan') {
+            handleMkan(tileCode);
+            nakiHandled = true;
+        } else if (currentNaki === 'akan') {
+            handleAkan(tileCode);
+            nakiHandled = true;
+        }
 
-        currentNaki = null;
-        return true;
+        if (nakiHandled) {
+            currentNaki = null; // 全ての鳴き処理が終わってからリセット
+            return true;
+        }
+        return false;
     };
 
+    // --- 各鳴き処理 ---
+    async function handleChi(tileCode) {
+        let meldData = [tileCode, getNextTileCode(tileCode, 1), getNextTileCode(tileCode, 2)];
+        const fiveIndex = meldData.findIndex(t => t && t.startsWith('5'));
+
+        if (fiveIndex !== -1) {
+            const tileSuit = meldData[fiveIndex].slice(-1);
+            const chosenFive = await askForRedFive(tileSuit);
+            meldData[fiveIndex] = chosenFive;
+        }
+
+        removeSlotsFromHand(3);
+        const newMeld = { type: 'chi', tiles: meldData };
+        window.meldedSets.push(newMeld);
+        renderSingleMeld(newMeld);
+        window.refillAndSort();
+        window.updateWinningTileHighlight();
+    }
+
+    function handlePon(tileCode) {
+        removeSlotsFromHand(3);
+        const newMeld = { type: 'pon', tiles: [tileCode, tileCode, tileCode] };
+        window.meldedSets.push(newMeld);
+        renderSingleMeld(newMeld);
+        window.refillAndSort();
+        window.updateWinningTileHighlight();
+    }
+
+    function handleMkan(tileCode) {
+        removeSlotsFromHand(3);
+        const newMeld = { type: 'mkan', tiles: [tileCode, tileCode, tileCode, tileCode] };
+        window.meldedSets.push(newMeld);
+        renderSingleMeld(newMeld);
+        window.refillAndSort();
+        window.updateWinningTileHighlight();
+    }
+
+    function handleAkan(tileCode) {
+        removeSlotsFromHand(3);
+        const newMeld = { type: 'akan', tiles: [tileCode, tileCode, tileCode, tileCode] };
+        window.meldedSets.push(newMeld);
+        renderSingleMeld(newMeld);
+        window.refillAndSort();
+        window.updateWinningTileHighlight();
+    }
+
+    // --- ヘルパー関数 ---
+    function getNextTileCode(tileCode, offset = 1) {
+        const suit = tileCode.slice(-1);
+        const num = parseInt(tileCode[0], 10);
+        if (isNaN(num) || num + offset > 9) return null;
+        return (num + offset) + suit;
+    }
+    
     function undoMeld(meldGroupElement) {
         const meldData = JSON.parse(meldGroupElement.dataset.meld);
         const meldIndex = window.meldedSets.findIndex(set =>
@@ -87,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.meldedSets.splice(meldIndex, 1);
         }
         meldGroupElement.remove();
-        addSlotsToHand(3);
+        addSlotsToHand(meldData.tiles.length === 4 ? 4 : 3); // カンの場合は4枚戻す
     }
 
     function addSlotsToHand(count) {
@@ -102,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
             window.addClickToSelectHandlers();
         }
         window.refillAndSort();
-        // ★追加：鳴きを取り消した後もハイライトを更新
         if (window.updateWinningTileHighlight) {
             window.updateWinningTileHighlight();
         }
@@ -117,52 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
             removeCount--;
         }
         window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
-    }
-
-    // --- ★★★ ここからが修正箇所 ★★★ ---
-    function handlePon(tileCode) {
-        removeSlotsFromHand(3);
-        const newMeld = { type: 'pon', tiles: [tileCode, tileCode, tileCode] };
-        window.meldedSets.push(newMeld);
-        renderSingleMeld(newMeld);
-        window.refillAndSort();
-        window.updateWinningTileHighlight(); // ハイライト更新を呼び出し
-    }
-
-    function handleChi(tileCode) {
-        removeSlotsFromHand(3);
-        const meldData = [tileCode, getNextTileCode(tileCode, 1), getNextTileCode(tileCode, 2)];
-        const newMeld = { type: 'chi', tiles: meldData };
-        window.meldedSets.push(newMeld);
-        renderSingleMeld(newMeld);
-        window.refillAndSort();
-        window.updateWinningTileHighlight(); // ハイライト更新を呼び出し
-    }
-
-    function handleMkan(tileCode) {
-        removeSlotsFromHand(3);
-        const newMeld = { type: 'mkan', tiles: [tileCode, tileCode, tileCode, tileCode] };
-        window.meldedSets.push(newMeld);
-        renderSingleMeld(newMeld);
-        window.refillAndSort();
-        window.updateWinningTileHighlight(); // ハイライト更新を呼び出し
-    }
-
-    function handleAkan(tileCode) {
-        removeSlotsFromHand(3);
-        const newMeld = { type: 'akan', tiles: [tileCode, tileCode, tileCode, tileCode] };
-        window.meldedSets.push(newMeld);
-        renderSingleMeld(newMeld);
-        window.refillAndSort();
-        window.updateWinningTileHighlight(); // ハイライト更新を呼び出し
-    }
-    // ★★★ 修正ここまで ★★★
-
-    function getNextTileCode(tileCode, offset = 1) {
-        const suit = tileCode.slice(-1);
-        const num = parseInt(tileCode[0], 10);
-        if (isNaN(num) || num + offset > 9) return null;
-        return (num + offset) + suit;
     }
 
     function renderSingleMeld(meld) {

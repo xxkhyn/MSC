@@ -174,3 +174,55 @@ body {
   transform: translateY(-4px); /* 少し上に浮かせる */
   transition: transform 0.2s, box-shadow 0.2s; /* アニメーション効果 */
 }
+
+/* モーダルウィンドウのスタイル */
+.modal-overlay {
+  position: fixed; /* 画面に固定 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒い背景 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* 他の要素より手前に表示 */
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 25px 35px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px; /* ボタン間のスペース */
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.modal-buttons button:hover {
+  background-color: #e0e0e0;
+}
+
+#use-red-btn {
+  background-color: #c42a2a; /* 赤ボタンのスタイル */
+  color: white;
+  border-color: #a02020;
+}
+#use-red-btn:hover {
+    background-color: #a02020;
+}
+
