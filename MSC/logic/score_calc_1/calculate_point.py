@@ -2,7 +2,7 @@
 from MSC.logic.object.han import YakuCounter
 from MSC.logic.object.han import Yakumann
 from MSC.models import Condition
-from MSC.logic.score_calc_1.calculate_hu import calculate_fu
+#from MSC.logic.score_calc_1.calculate_point import calculate_fu
 import math
 
 class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そこから条件分岐により点数計算
@@ -47,7 +47,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
             return fu * (2 ** (2 + han))  # 満貫以下
 
     @staticmethod
-    def calculate_score(han: int, fu: int, is_tsumo: bool, is_oya: bool):
+    def calculate_score(han: int, fu: int, is_tsumo: bool, is_oya: bool, condition:Condition):
         base = ScoreCalculator.calculate_base_point(han, fu)
 
         # 満貫判定

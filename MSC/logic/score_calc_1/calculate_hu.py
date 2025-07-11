@@ -1,8 +1,12 @@
 from MSC.logic.object.melds import TILE_TO_INDEX
+from MSC.models import Condition
+from MSC.logic.yaku.yaku import is_chiitoitsu
 
 def calculate_fu(hand_instance, condition_instance, agari_pattern) -> int:
     mentsu_list, head = agari_pattern
     winning_tile = TILE_TO_INDEX[hand_instance.winning_pai]
+    if is_chiitoitsu == 1:
+        return 25
     fu = 20 if hand_instance.is_tsumo else 30  # 面前ロンは30符、面前ツモは20符
 
     # 雀頭が役牌（場風、自風、三元牌）なら +2符
