@@ -11,15 +11,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'msc_project.config.settings')
 django.setup()
 
-"""analyze_hand_modelを引き出せばmodelsのすべての処理を引き出せる
-    手牌の解析（アガれる形かどうか・面子構成の確認・）
-    手牌配列と副露が別で送られてくるので、副露の情報を反映させつつ
-    副露を含めた手牌を送る。
-
-    返し値：
-    解析済み手牌・ガれなかった場合のエラーアメッセージ
-"""
-
 
 # 手牌オブジェクト内の手牌配列を数値化する
 TILE_TO_INDEX = {
@@ -30,7 +21,11 @@ TILE_TO_INDEX = {
 }
 
 # 手牌配列を数値化する関数
-def tile_strs_to_indices(tiles: List[str]) -> List[int]:
+# hand_objに格納されている情報を確認したい場合はmodels.pyのHandオブジェクトを参照
+def tile_strs_to_indices(hand_obj):
+    
+    hand_pai = hand_obj.hand_pai
+
     indices = []
     for t in tiles:
         if t not in TILE_TO_INDEX:
