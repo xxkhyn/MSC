@@ -77,21 +77,39 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
             # base は切り上げしない
 
 
-        # 点数計算（支払点は必ず切り上げ）
+        # 積棒と供託を取得
+        honba = condition.honba  # 1本場ごとに +300点
+        kyotaku = condition.kyotaku  # ロン時のみ和了者に加算
+
+# 点数詳細と出力用文字列を作成
         if is_tsumo:
             if is_oya:
-                score_val = ScoreCalculator.round_up_100(base * 2)#basepointの切り上げ
-                score_detail = {"oya_all": score_val}       #ここでやらないと計算がずれる
+                score_val = ScoreCalculator.round_up_100(base * 2 + 100 * honba)
+                score_val += 1000 * kyotaku  # 供託加算
+                score_detail = {
+                    "oya_all": score_val
+                }
                 score_text = f"{score_val}オール"
             else:
-                ko_score = ScoreCalculator.round_up_100(base)
-                oya_score = ScoreCalculator.round_up_100(base * 2)
-                score_detail = {"ko": ko_score, "oya": oya_score}
+                ko_score = ScoreCalculator.round_up_100(base + 100 * honba)
+                oya_score = ScoreCalculator.round_up_100(base * 2 + 100 * honba)
+                total_score = ko_score * 2 + oya_score + 1000 * kyotaku
+                score_detail = {
+                    "ko": ko_score,
+                    "oya": oya_score,
+                    "kyotaku_bonus": 1000 * kyotaku
+                }
                 score_text = f"{ko_score},{oya_score}"
         else:
-            ron_score = ScoreCalculator.round_up_100(base * 6 if is_oya else base * 4)
-            score_detail = {"ron_score": ron_score}
+            ron_score = ScoreCalculator.round_up_100((base * 6 if is_oya else base * 4) + 300 * honba + 1000 * kyotaku)
+            score_detail = {
+                "ron_score": ron_score,
+                "honba_bonus": 300 * honba,
+                "kyotaku_bonus": 1000 * kyotaku
+            }
             score_text = str(ron_score)
+
+
 
         return {
             "base_point": base,#点数計算に使用した数字、表示させる際はいらないけどテスト用に残した
