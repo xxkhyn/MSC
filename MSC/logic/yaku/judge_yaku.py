@@ -1,50 +1,82 @@
-import sys
-import os
-import django
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "msc_project.config.settings")
-django.setup()
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
-from MSC.logic.yaku.yaku import (
-    is_tanyao, is_pinfu, is_iipeikou, is_chiitoitsu,
-    is_ryanpeikou, is_toitoi,
-    # 他の役もあれば追加
-)
-from logic.object.han import YakuCounter
-
+from MSC.logic.object.han import YakuCounter, Yakumann, resolve_conflicts
 
 def judge_yaku(parsed_hand, huuro=None):
-    yaku_counter = YakuCounter()
-    
-    # huuro（副露）あり・なしで判定を変えたい場合
-    huuro = huuro or []
-    
-    # 役判定群を順番に呼ぶ（例）
+    """
+    parsed_hand: {
+        "mentsu": [...],
+        "pair": {...},
+        "wait": ...,
+        "tiles_count": [...],  # optional
+        "winning_tile_index": int,  # optional
+    }
+    huuro: 副露リスト
+
+    役満と通常役を別々に判定し、排他処理の後、役名と翻数の辞書を返す。
+    """
+
+    if huuro is None:
+        huuro = []
+
+    yaku_counter = YakuCounter()  # 通常役カウンター
+    yakumann = Yakumann()         # 役満カウンター
+
+    # 役満判定関数群インポート
+    from MSC.logic.yaku.yaku import (
+        is_kokushi, is_kokushi_13machi, is_chinroutou, is_tsuuiisou,
+        is_chuuren, is_ryuisou, is_daisuusii, is_sangenpai,
+        is_suukantsu, is_suuankou, is_suuankou_tanki,
+    )
+
+    tiles_counts = parsed_hand.get("tiles_count", None)
+    winning_tile_index = parsed_hand.get("winning_tile_index", None)
+
+    # 役満判定
+    if tiles_counts:
+        is_kokushi(tiles_counts, yakumann)
+        if winning_tile_index is not None:
+            is_kokushi_13machi(tiles_counts, winning_tile_index, yakumann)
+        is_chinroutou(tiles_counts, yakumann)
+        is_tsuuiisou(tiles_counts, yakumann)
+
+    is_chuuren(parsed_hand, yakumann)
+    is_ryuisou(parsed_hand, yakumann)
+    is_daisuusii(parsed_hand, yakumann)
+    is_sangenpai(parsed_hand, yakumann)
+    is_suukantsu(parsed_hand, yakumann)
+    is_suuankou(parsed_hand, yakumann)
+    is_suuankou_tanki(parsed_hand, yakumann)
+
+    # 通常役判定関数群インポート
+    from MSC.logic.yaku.yaku import (
+        is_ryanpeikou,
+        is_chiitoitsu, is_ikkitsuukan, is_sanshoku_doujun, is_sankantsu,
+        is_sanankou, is_toitoi, is_honroutou, is_sanshoku_doukou,
+        is_tanyao, is_pinfu, is_iipeikou,
+    )
+
+    # 高翻役（通常役）
+    is_ryanpeikou(parsed_hand, yaku_counter, huuro)
+
+    # 中翻役（通常役）
+    is_chiitoitsu(tiles_counts, yaku_counter)
+    is_ikkitsuukan(parsed_hand, yaku_counter, huuro)
+    is_sanshoku_doujun(parsed_hand, yaku_counter, huuro)
+    is_sankantsu(parsed_hand, yaku_counter, huuro)
+    is_sanankou(parsed_hand, yaku_counter)
+    is_toitoi(parsed_hand, yaku_counter)
+    is_honroutou(tiles_counts, yaku_counter)
+    is_sanshoku_doukou(parsed_hand, yaku_counter, huuro)
+
+    # 低翻役（通常役）
     is_tanyao(parsed_hand, yaku_counter, huuro)
     is_pinfu(parsed_hand, yaku_counter, huuro)
     is_iipeikou(parsed_hand, yaku_counter, huuro)
-    is_chiitoitsu(parsed_hand, yaku_counter)
-    is_ryanpeikou(parsed_hand, yaku_counter, huuro)
-    is_toitoi(parsed_hand, yaku_counter)
-    # ... 必要な役判定を全部
-    
-    # 最後に重複排除
-    yaku_counter.resolve_conflicts()
-    
-    # 役判定結果を辞書やリストで返す
-    return yaku_counter.yaku
 
-parsed_hand = {
-    "mentsu": [
-        {"type": "shuntsu", "tiles": ["m1", "m2", "m3"], "open": False},
-        {"type": "kotsu", "tiles": ["z1", "z1", "z1"], "open": False},
-        {"type": "kotsu", "tiles": ["p7", "p7", "p7"], "open": False},
-        {"type": "shuntsu", "tiles": ["s4", "s5", "s6"], "open": False}
-    ],
-    "pair": {"type": "simple", "tiles": ["m9", "m9"]},
-    "wait": "ryanmen"
-}
+    # 排他処理（役満と通常役の排他含む）
+    resolve_conflicts(yaku_counter, yakumann)
 
-result = judge_yaku(parsed_hand, huuro=[])
-print(result)
+    # 役満があれば役満のみ返す、なければ通常役を返す
+    if yakumann.get_count() > 0:
+        return {name: 13 for name in yakumann.get_yakus()}  # 役満は13翻固定など適宜調整
+    else:
+        return yaku_counter.get_yakus()
