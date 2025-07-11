@@ -22,7 +22,10 @@ def condition_submit_api(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print("受信データ：", data)
+            
+            # デバック用コード
+            print("\n条件受信データ：\n", data)
+            print('\n')
 
             condition = Condition.objects.create(
                 is_riichi = data.get("is_riichi", False),
@@ -36,7 +39,7 @@ def condition_submit_api(request):
                 player_type = data.get("player_type", "parent"),
                 kyotaku=int(data.get('kyotaku', 0)),
                 honba=int(data.get('honba', 0)),
-
+                is_tsumo=data.get('is_tsumo', False)
             )
             return JsonResponse({"success": True, "condition_id": condition.id})
         except Exception as e:
@@ -70,6 +73,11 @@ def hand_input_api(request):
         try:
             data = json.loads(request.body)
             
+            # デバック用コード
+            print("\n手牌受信データ：\n", data)
+            print('\n')
+
+
             # hand_paiだけは必須、他はオプショナル
             if not data.get('hand_pai'):
                 return JsonResponse({'error': 'hand_pai is required'}, status=400)
@@ -78,7 +86,6 @@ def hand_input_api(request):
             hand = Hand.objects.create(
                 hand_pai=data.get('hand_pai', ''),
                 winning_pai=data.get('winning_pai', ''),
-                is_tsumo=data.get('is_tsumo', True),
                 is_huuro=data.get('is_huuro', False),
                 huuro=data.get('huuro', ''),
                 dora_pai=data.get('dora_pai', '')
@@ -99,8 +106,25 @@ def calculate_score_api(request):
             hand = Hand.objects.last()
             condition = Condition.objects.last()
 
-            # 仮の計算結果（ここは仮でよい）
-            result_obj = calculator.calculate_score(hand, condition)
+            if hand is None:
+                raise ValueError("Hand データが存在しません")
+            if condition is None:
+                raise ValueError("Condition データが存在しません")
+
+            
+
+            print("\n手牌オブジェクト:", hand)
+            print("\n条件オブジェクト:", condition)
+
+            try:
+                result_obj = calculator.calculate_score(hand, condition)
+                print("\n▶ calculate_score 成功:", result_obj)
+            except Exception as e:
+                import traceback; traceback.print_exc()
+                return JsonResponse({
+                    "success": False,
+                    "error": f"\ncalculate_score で例外: {e}"
+                }, status=500)
 
             # ScoreResult をDBに保存
             score_result = ScoreResult.objects.create(
@@ -110,6 +134,11 @@ def calculate_score_api(request):
                 yaku_list=result_obj.yaku_list,
                 error_message=result_obj.error_message
             )
+
+            # デバック用コード
+            print("計算結果:", score_result)
+            print('\n')
+
 
             # result_id を返す
             return JsonResponse({
@@ -122,12 +151,6 @@ def calculate_score_api(request):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
-
-def score_result_view(request, result_id):
-    result = get_object_or_404(ScoreResult, pk=result_id)
-    return render(request, "MSC/score_result.html", {"result": result})
-
-from django.http import JsonResponse
 
 def score_result_api_view(request, result_id):
     result = get_object_or_404(ScoreResult, pk=result_id)

@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms.models import model_to_dict
 
 # 条件オブジェクト
 class Condition(models.Model):
@@ -13,6 +14,7 @@ class Condition(models.Model):
   is_houtei = models.BooleanField(default=False, verbose_name="河底")
   is_tenho = models.BooleanField(default=False, verbose_name="天和")
   
+  is_tsumo = models.BooleanField(default=True, verbose_name="ツモ和了")
 
   WIND_CHOICES = [
         ('east', '東'),
@@ -43,7 +45,11 @@ class Condition(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)
 
   def __str__(self):
-    return f"Condition(Riichi={self.is_riichi}, Tsumo={self.is_tsumo})"
+        # model_to_dict で全フィールドの dict を取得し、
+        # "key=value" の列として出力
+        data = model_to_dict(self)
+        pairs = [f"{k}={v!r}" for k, v in data.items()]
+        return f"Condition({', '.join(pairs)})"
 
 # 手牌オブジェクト
 class Hand(models.Model):
