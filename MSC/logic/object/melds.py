@@ -87,7 +87,7 @@ def parse_huuro_to_melds(huuro_data: List[dict]) -> List[dict]:
         elif meld_type == "kan":
             melds.append({"type": "kan", "tiles": tiles_num, "open": is_open})
     return melds
-
+"""analyze_hand_modelを引き出せばmodelsのすべての処理を引き出せる"""
 def analyze_hand_model(hand_instance: models.Hand) -> dict:
     hand_numeric = tile_strs_to_indices(hand_instance.hand_pai + [hand_instance.winning_pai])
     melds = parse_huuro_to_melds(hand_instance.huuro)

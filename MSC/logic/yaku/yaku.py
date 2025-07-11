@@ -5,12 +5,21 @@ from MSC.logic.object.tiles import MahjongParser
 from MSC.models import ScoreResult
 from MSC.logic.object import melds
 from MSC import models
+from typing import List
 TILE_TO_INDEX = {
     **{f"m{i}": i-1 for i in range(1, 10)},
     **{f"p{i}": 9 + i-1 for i in range(1, 10)},
     **{f"s{i}": 18 + i-1 for i in range(1, 10)},
     **{f"z{i}": 27 + i-1 for i in range(1, 8)},
 }
+def tile_strs_to_indices(tiles: List[str]) -> List[int]:
+    indices = []
+    for t in tiles:
+        if t not in TILE_TO_INDEX:
+            raise ValueError(f"未知の牌表記: {t}")
+        indices.append(TILE_TO_INDEX[t])
+    return indices
+
 KOKUSHI_INDICES = [
     0, 8,   # m1, m9
     9, 17,  # p1, p9
