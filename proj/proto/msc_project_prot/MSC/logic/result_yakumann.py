@@ -21,6 +21,8 @@ class PointCalculator:
                 "hand_type":"yakumann_error",
                 "score":"0"
             }
+            result["hand_type"] = ("yakumann_error")
+            return -1
 
         base = 16000 
         multiplier = self.yakumann_count
