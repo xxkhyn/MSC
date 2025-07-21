@@ -1,0 +1,351 @@
+from MSC.logic.object import tiles
+from MSC.logic.object.han import YakuCounter
+from MSC.logic.object.han import Yakumann
+from MSC.logic.object.tiles import MahjongParser
+from MSC.models import ScoreResult
+from MSC.logic.object import melds
+from MSC import models
+from typing import List
+TILE_TO_INDEX = {
+    **{f"m{i}": i-1 for i in range(1, 10)},
+    **{f"p{i}": 9 + i-1 for i in range(1, 10)},
+    **{f"s{i}": 18 + i-1 for i in range(1, 10)},
+    **{f"z{i}": 27 + i-1 for i in range(1, 8)},
+}
+def tile_strs_to_indices(tiles: List[str]) -> List[int]:
+    indices = []
+    for t in tiles:
+        if t not in TILE_TO_INDEX:
+            raise ValueError(f"未知の牌表記: {t}")
+        indices.append(TILE_TO_INDEX[t])
+    return indices
+
+KOKUSHI_INDICES = [
+    0, 8,   # m1, m9
+    9, 17,  # p1, p9
+    18, 26, # s1, s9
+    27, 28, 29, 30, 31, 32, 33  # 字牌
+]
+NUMERIC_TO_TILE = {
+    v: k for k, v in TILE_TO_INDEX.items()
+}
+
+
+
+# ✅ 役満
+
+def is_kokushi(tiles,  yakumann):
+    pair_count = 0
+    for idx in KOKUSHI_INDICES:
+        if tiles[idx] == 0:
+            return False
+        if tiles[idx] >= 2:
+            pair_count += 1
+    if pair_count == 1 and sum(tiles) == 14:
+        yakumann.add_yaku("国士無双")
+        return True
+    return False
+
+def is_kokushi_13machi(tiles, winning_tile_index,  yakumann):
+    if all(tiles[idx] == 1 for idx in KOKUSHI_INDICES) and winning_tile_index in KOKUSHI_INDICES:
+        yakumann.add_yaku("国士無双十三面待ち")
+        return True
+    return False
+
+def is_chinroutou(tiles,  yakumann):
+    for i in range(0, 27):
+        num = i % 9 + 1
+        if tiles[i] > 0 and num != 1 and num != 9:
+            return False
+    yakumann.add_yaku("清老頭")
+    return True
+
+def is_tsuuiisou(tiles,  yakumann):
+    for i in range(27):
+        if tiles[i] > 0:
+            return False
+    yakumann.add_yaku("字一色")
+    return True
+
+def is_chuuren(parsed_hand, yakumann):
+    from collections import Counter
+
+    tiles_flat = []
+    for m in parsed_hand.get("mentsu", []) + [parsed_hand.get("pair")]:
+        if not m:
+            continue
+        tile_strs = [NUMERIC_TO_TILE[idx] for idx in m["tiles"]]
+        tiles_flat.extend(tile_strs)
+
+    suits = {t[0] for t in tiles_flat if not t.startswith("z")}
+    if len(suits) != 1:
+        return False
+
+    nums = [int(t[1]) for t in tiles_flat if not t.startswith("z")]
+    counter_tile = Counter(nums)
+
+    base = [1,1,1,2,3,4,5,6,7,8,9,9,9]
+
+    temp_counter = counter_tile.copy()
+    for i in base:
+        if temp_counter[i] == 0:
+            return False
+        temp_counter[i] -= 1
+
+    remaining = [k for k, v in temp_counter.items() if v > 0]
+
+    if len(remaining) == 1:
+        yakumann.add_yaku("純正九蓮宝燈")
+    else:
+        yakumann.add_yaku("九蓮宝燈")
+
+    return True
+
+def is_ryuisou(parsed_hand, yakumann):
+    green_tiles = {"s2", "s3", "s4", "s6", "s8", "z6"}
+    for m in parsed_hand.get("mentsu", []) + [parsed_hand.get("pair")]:
+        if not m:
+            continue
+        tile_strs = [NUMERIC_TO_TILE[idx] for idx in m["tiles"]]
+        if not all(t in green_tiles for t in tile_strs):
+            return False
+    yakumann.add_yaku("緑一色")
+    return True
+
+
+
+
+def is_daisuusii(parsed_hand,  yakumann):
+    winds = {"z1", "z2", "z3", "z4"}
+    count = 0
+    for m in parsed_hand.get("mentsu", []):
+        if m["type"] == "kotsu" and m["tiles"][0] in winds:
+            count += 1
+    if count == 4:
+        yakumann.add_yaku("大四喜")
+        return True
+    elif count == 3:
+        pair_tile = parsed_hand.get("pair", {}).get("tiles", [None])[0]
+        if pair_tile in winds:
+            yakumann.add_yaku("小四喜")
+            return True
+    return False
+
+def is_sangenpai(parsed_hand,  yakumann):
+    sangen = {"z5": "白", "z6": "發", "z7": "中"}
+    count = 0
+    for m in parsed_hand.get("mentsu", []):
+        if m["type"] == "kotsu" and m["tiles"][0] in sangen:
+            count += 1
+    if count == 2:
+        add_yaku("小三元", 2)
+        return True
+    elif count == 3:
+        yakumann.add_yaku("大三元")
+        return True
+    return False
+
+def is_suukantsu(parsed_hand,  yakumann):
+    kan_count = sum(1 for m in parsed_hand.get("mentsu", []) if m["type"] == "kan")
+    if kan_count == 4:
+        yakumann.add_yaku("四槓子")
+        return True
+    return False
+
+def is_suuankou(parsed_hand,  yakumann):
+    ankou_count = sum(1 for m in parsed_hand.get("mentsu", []) if m["type"] == "kotsu" and not m.get("open", False))
+    if ankou_count == 4:
+        yakumann.add_yaku("四暗刻")
+        return True
+    return False
+
+def is_suuankou_tanki(parsed_hand,  yakumann):
+    ankou_count = sum(1 for m in parsed_hand.get("mentsu", []) if m["type"] == "kotsu" and not m.get("open", False))
+    if ankou_count == 4 and parsed_hand.get("wait") == "tanki":
+        yakumann.add_yaku("四暗刻単騎")
+        return True
+    return False
+
+
+def is_chinitsu(parsed_hand, YakuCounter, huuro):
+    suits = set()
+    for m in parsed_hand.get("mentsu", []) + [parsed_hand.get("pair", {})]:
+        for tile in m.get("tiles", []):
+            if tile.startswith("z"):
+                return False
+            suits.add(tile[1])
+    if len(suits) == 1:
+        YakuCounter.add_yaku("清一色", 5 if huuro else 6)
+        return True
+    return False
+
+def is_honitsu(parsed_hand, YakuCounter, huuro):
+    suits = set()
+    has_honor = False
+    for m in parsed_hand.get("mentsu", []) + [parsed_hand.get("pair", {})]:
+        for tile in m.get("tiles", []):
+            if tile.startswith("z"):
+                has_honor = True
+            else:
+                suits.add(tile[1])
+    if has_honor and len(suits) == 1:
+        YakuCounter.add_yaku("混一色", 2 if huuro else 3)
+        return True
+    return False
+
+"""3翻"""
+
+def is_ryanpeikou(parsed_hand, YakuCounter, huuro):
+    if huuro:
+        return False
+    shuntsus = [tuple(m["tiles"]) for m in parsed_hand.get("mentsu", []) if m["type"] == "shuntsu"]
+    used = set()
+    pair_count = 0
+    for i in range(len(shuntsus)):
+        for j in range(i+1, len(shuntsus)):
+            if shuntsus[i] == shuntsus[j] and (i,j) not in used and (j,i) not in used:
+                pair_count += 1
+                used.add((i,j))
+                break
+    if pair_count == 2:
+        YakuCounter.add_yaku("二盃口", 3)
+        return True
+    return False
+
+# ✅ 2翻
+
+def is_chiitoitsu(tiles, YakuCounter):
+    pair_count = 0
+    for count in tiles:
+        if count == 2:
+            pair_count += 1
+        elif count != 0:
+            return False
+    if pair_count == 7:
+        YakuCounter.add_yaku("七対子", 2)
+        return True
+    return False
+
+def is_ikkitsuukan(parsed_hand, YakuCounter, huuro):
+    is_huuro = bool(huuro)
+    suits = {"m": [False]*3, "p": [False]*3, "s": [False]*3}
+    for m in parsed_hand.get("mentsu", []):
+        if m["type"] == "shuntsu":
+            base = m["tiles"][0]
+            num = int(base[0])
+            suit = base[1]
+            if num == 1:
+                suits[suit][0] = True
+            elif num == 4:
+                suits[suit][1] = True
+            elif num == 7:
+                suits[suit][2] = True
+    for suit in suits:
+        if all(suits[suit]):
+            YakuCounter.add_yaku("一気通貫", 1 if is_huuro else 2)
+            return True
+    return False
+
+def is_sanshoku_doujun(parsed_hand, YakuCounter, huuro):
+    is_huuro = bool(huuro)
+    sequences = {}
+    for m in parsed_hand.get("mentsu", []):
+        if m["type"] == "shuntsu":
+            base = m["tiles"][0]
+            num = int(base[0])
+            suit = base[1]
+            sequences.setdefault(num, set()).add(suit)
+    for suits in sequences.values():
+        if len(suits) == 3:
+            YakuCounter.add_yaku("三色同順", 1 if is_huuro else 2)
+            return True
+    return False
+
+def is_sankantsu(parsed_hand, YakuCounter, huuro):
+    kan_count = sum(1 for m in parsed_hand.get("mentsu", []) if m["type"] == "kan")
+    if kan_count >= 3:
+        YakuCounter.add_yaku("三槓子", 2)
+        return True
+    return False
+
+def is_sanankou(parsed_hand, YakuCounter):
+    ankou_count = 0
+    for meld in parsed_hand.get("mentsu", []):
+        if meld["type"] == "kotsu" and not meld.get("open", False):
+            ankou_count += 1
+    if ankou_count >= 3:
+        YakuCounter.add_yaku("三暗刻", 2)
+        return True
+    return False
+
+def is_toitoi(parsed_hand, YakuCounter):
+    for m in parsed_hand.get("mentsu", []):
+        if m["type"] != "kotsu" and m["type"] != "kan":
+            return False
+    YakuCounter.add_yaku("対々和", 2)
+    return True
+
+def is_honroutou(tiles, YakuCounter):
+    for i in range(0, 27):
+        num = i % 9 + 1
+        if tiles[i] > 0 and num != 1 and num != 9:
+            return False
+    YakuCounter.add_yaku("混老頭", 2)
+    return True
+
+def is_sanshoku_doukou(parsed_hand, YakuCounter, huuro):
+    counts = {}
+    for m in parsed_hand.get("mentsu", []):
+        if m["type"] == "kotsu":
+            base = m["tiles"][0]
+            num = int(base[0])
+            suit = base[1]
+            counts.setdefault(num, set()).add(suit)
+    for suits in counts.values():
+        if len(suits) == 3:
+            YakuCounter.add_yaku("三色同刻", 2)
+            return True
+    return False
+
+# ✅ 1翻
+
+def is_tanyao(parsed_hand, YakuCounter, huuro):
+    for m in parsed_hand.get("mentsu", []) + [parsed_hand.get("pair", {})]:
+        for tile in m.get("tiles", []):
+            if tile.startswith("z") or tile[0] in ["1", "9"]:
+                return False
+    YakuCounter.add_yaku("断么九", 1)
+    return True
+
+def is_pinfu(parsed_hand, YakuCounter, huuro):
+    if huuro:
+        return False
+    if parsed_hand.get("pair", {}).get("type") == "honor":
+        return False
+    for m in parsed_hand.get("mentsu", []):
+        if m["type"] != "shuntsu":
+            return False
+    if parsed_hand.get("wait") != "ryanmen":
+        return False
+    YakuCounter.add_yaku("平和", 1)
+    return True
+
+def is_iipeikou(parsed_hand, YakuCounter, huuro):
+    if huuro:
+        return False
+    shuntsus = [tuple(m["tiles"]) for m in parsed_hand.get("mentsu", []) if m["type"] == "shuntsu"]
+    for i in range(len(shuntsus)):
+        for j in range(i + 1, len(shuntsus)):
+            if shuntsus[i] == shuntsus[j]:
+                YakuCounter.add_yaku("一盃口", 1)
+                return True
+    return False
+
+def resolve_conflicts(self):
+    # 複合不可の役の排他制御例
+    if "四暗刻単騎" in self.yaku and "四暗刻" in self.yaku:
+        self.remove_yaku("四暗刻")  # 上位役を優先
+    if "小三元" in self.yaku and "大三元" in self.yaku:
+        self.remove_yaku("小三元")
+    if "二盃口" in self.yaku and "一盃口" in self.yaku:
+        self.remove_yaku("一盃口")

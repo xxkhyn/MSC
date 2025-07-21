@@ -14,7 +14,7 @@ def index_view(request):
     return render(request, 'MSC/index.html', {
         'hand_form': hand_form,
         'condition_form': condition_form,
-        'result': result,
+        'result': None,
     })
 
 @csrf_exempt
@@ -22,12 +22,24 @@ def condition_submit_api(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            
+            # デバック用コード
+            print("\n条件受信データ：\n", data)
+            print('\n')
 
             condition = Condition.objects.create(
                 is_riichi = data.get("is_riichi", False),
                 is_ippatsu=data.get("is_ippatsu", False),
+                is_rinshan=data.get("is_rinshan", False),
+                is_chankan=data.get("is_chankan", False),
+                is_haitei=data.get("is_haitei", False),
+                is_tenho=data.get("is_tenho", False),
                 prevalent_wind=data.get("prevalent_wind", "east"),
                 seat_wind=data.get("seat_wind", "east"),
+                player_type = data.get("player_type", "parent"),
+                kyotaku=int(data.get('kyotaku', 0)),
+                honba=int(data.get('honba', 0)),
+                is_tsumo=data.get('is_tsumo', False)
             )
             return JsonResponse({"success": True, "condition_id": condition.id})
         except Exception as e:
@@ -61,6 +73,11 @@ def hand_input_api(request):
         try:
             data = json.loads(request.body)
             
+            # デバック用コード
+            print("\n手牌受信データ：\n", data)
+            print('\n')
+
+
             # hand_paiだけは必須、他はオプショナル
             if not data.get('hand_pai'):
                 return JsonResponse({'error': 'hand_pai is required'}, status=400)
@@ -89,21 +106,44 @@ def calculate_score_api(request):
             hand = Hand.objects.last()
             condition = Condition.objects.last()
 
-            # こっちが本物のコード
-            # result = calculator.calculate_score(hand, condition)
+            if hand is None:
+                raise ValueError("Hand データが存在しません")
+            if condition is None:
+                raise ValueError("Condition データが存在しません")
 
-            # 以下はテスト用のダミーコード
-            result = test_calculator.calculate_score(hand, condition)
+            
 
+            print("\n手牌オブジェクト:", hand)
+            print("\n条件オブジェクト:", condition)
+
+            try:
+                result_obj = calculator.calculate_score(hand, condition)
+                print("\n▶ calculate_score 成功:", result_obj)
+            except Exception as e:
+                import traceback; traceback.print_exc()
+                return JsonResponse({
+                    "success": False,
+                    "error": f"\ncalculate_score で例外: {e}"
+                }, status=500)
+
+            # ScoreResult をDBに保存
+            score_result = ScoreResult.objects.create(
+                han=result_obj.han,
+                fu=result_obj.fu,
+                point=result_obj.point,
+                yaku_list=result_obj.yaku_list,
+                error_message=result_obj.error_message
+            )
+
+            # デバック用コード
+            print("計算結果:", score_result)
+            print('\n')
+
+
+            # result_id を返す
             return JsonResponse({
                 "success": True,
-                "result": {
-                    "han": result.han,
-                    "fu": result.fu,
-                    "point": result.point,
-                    "yaku_list": result.yaku_list,
-                    "error_message": result.error_message,
-                }
+                "result_id": score_result.id
             })
 
         except Exception as e:
@@ -111,12 +151,6 @@ def calculate_score_api(request):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
-
-def score_result_view(request, result_id):
-    result = get_object_or_404(ScoreResult, pk=result_id)
-    return render(request, "MSC/score_result.html", {"result": result})
-
-from django.http import JsonResponse
 
 def score_result_api_view(request, result_id):
     result = get_object_or_404(ScoreResult, pk=result_id)

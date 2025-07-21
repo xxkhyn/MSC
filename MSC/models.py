@@ -1,10 +1,10 @@
 from django.db import models
+from django.forms.models import model_to_dict
 
 # 条件オブジェクト
 class Condition(models.Model):
   """ユーザーが選択する麻雀の状況条件（リーチ、ツモ、チーなど）を保持するモデル"""
 
-  is_tsumo = models.BooleanField(default=False, verbose_name="ツモ")
   is_riichi = models.BooleanField(default=False, verbose_name="リーチ")
   is_double_riichi = models.BooleanField(default=False, verbose_name="ダブルリーチ")
   is_ippatsu = models.BooleanField(default=False, verbose_name="一発")
@@ -13,7 +13,8 @@ class Condition(models.Model):
   is_haitei = models.BooleanField(default=False, verbose_name="海底")
   is_houtei = models.BooleanField(default=False, verbose_name="河底")
   is_tenho = models.BooleanField(default=False, verbose_name="天和")
-  is_chiho = models.BooleanField(default=False, verbose_name="地和")
+  
+  is_tsumo = models.BooleanField(default=True, verbose_name="ツモ和了")
 
   WIND_CHOICES = [
         ('east', '東'),
@@ -25,10 +26,30 @@ class Condition(models.Model):
   seat_wind = models.CharField(max_length=5, choices=WIND_CHOICES, default='east', verbose_name="自風")
   prevalent_wind = models.CharField(max_length=5, choices=WIND_CHOICES, default='east', verbose_name="場風")
 
+  PLAYER_TYPE_CHOICES = [
+    ('parent', '親'),
+    ('child', '子'),
+  ]
+
+  player_type = models.CharField(
+    max_length=6,
+    choices=PLAYER_TYPE_CHOICES,
+    default='child',
+    verbose_name="親 or 子"
+  )
+
+  kyotaku = models.PositiveIntegerField(default=0, verbose_name="供託")
+  honba = models.PositiveIntegerField(default=0, verbose_name="積棒")
+
+
   created_at = models.DateTimeField(auto_now_add=True)
 
   def __str__(self):
-    return f"Condition(Riichi={self.is_riichi}, Tsumo={self.is_tsumo})"
+        # model_to_dict で全フィールドの dict を取得し、
+        # "key=value" の列として出力
+        data = model_to_dict(self)
+        pairs = [f"{k}={v!r}" for k, v in data.items()]
+        return f"Condition({', '.join(pairs)})"
 
 # 手牌オブジェクト
 class Hand(models.Model):
@@ -37,8 +58,11 @@ class Hand(models.Model):
   # 手牌13枚
   hand_pai = models.JSONField(verbose_name="手牌")
 
-  # 和了牌
+  # 和了牌 
   winning_pai = models.CharField(max_length=3, verbose_name="和了牌") 
+
+  # ツモ和了かどうか (Trueならツモ、Falseならロン)
+  is_tsumo = models.BooleanField(default=True, verbose_name="ツモ和了")
   
   # 副露をしているかどうか
   is_huuro = models.BooleanField(default=False, verbose_name="副露あり")

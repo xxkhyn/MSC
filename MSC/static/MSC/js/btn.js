@@ -53,6 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
       '北': 'north'
     };
 
+    const playerTypeText = getSelectedText('.option-group:nth-of-type(0)');
+    const player_type = (playerTypeText === '親') ? 'parent' : 'child';
+
     fetch('/api/condition/submit/', {
       method: 'POST',
       headers: {
@@ -66,7 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
         is_double_riichi: is_double_riichi,
         is_ippatsu: is_ippatsu,
         is_rinshan: is_rinshan,
-        is_chankan: is_chankan
+        is_chankan: is_chankan,
+        player_type: player_type,
         // 必要であれば他の条件も追加可能
       })
     })

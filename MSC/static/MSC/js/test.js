@@ -1,182 +1,348 @@
+// tehai.js (最終版)
+
 document.addEventListener('DOMContentLoaded', () => {
-  const tileImages = document.querySelectorAll('.tile-img');
-  const tileSlots = document.querySelectorAll('.tile-slot');
-  const resetButton = document.getElementById('reset-button');
-  const submitButton = document.getElementById('submit-hand');
+    // --- グローバル変数 ---
+    let activeDoraSlot = null;
+    let selectedDoraTiles = new Array(10).fill(null);
+    let activeHandSlot = null;
 
-  // CSRFトークンをCookieから取得する関数
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+    // --- グローバルに公開する変数と関数 ---
+    window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
+
+    window.updateWinningTileHighlight = function() {
+        window.tileSlots.forEach(slot => slot.classList.remove('winning-tile-slot'));
+        const handTilesCount = Array.from(window.tileSlots).filter(s => s.dataset.tile).length;
+        const meldedTilesCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
+        const totalTiles = handTilesCount + meldedTilesCount;
+
+        if (totalTiles === 14) {
+            const filledSlots = Array.from(window.tileSlots).filter(s => s.dataset.tile);
+            if (filledSlots.length > 0) {
+                const winningSlot = filledSlots[filledSlots.length - 1];
+                winningSlot.classList.add('winning-tile-slot');
+            }
         }
-      }
-    }
-    return cookieValue;
-  }
-  const csrftoken = getCookie('csrftoken');
-
-  function sendHandToServer() {
-    console.log('sendHandToServer called');
-    
-    const hand = [];
-    tileSlots.forEach(slot => {
-      if (slot.dataset.tile) hand.push(slot.dataset.tile);
-    });
-
-    if (hand.length === 0) {
-      alert("手牌を選択してください。");
-      return;
-    }
-
-    const payload = {
-      hand_pai: hand.join(','),
-      winning_pai: "1m",
-      is_huuro: false,
-      huuro: "",
-      dora_pai: "1z",
     };
 
-    console.log('Sending to:', 'http://127.0.0.1:8000/api/hand-input/');
-    console.log('Payload:', payload);
-
-    fetch('/api/hand-input/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,
-      },
-      body: JSON.stringify(payload),
-    })
-    .then(response => {
-      console.log('Response status:', response.status);
-      console.log('Response URL:', response.url);
-      
-      if (!response.ok) {
-        return response.text().then(text => {
-          console.log('Error response body:', text);
-          throw new Error(`HTTP ${response.status}: ${text}`);
+    window.refillAndSort = function() {
+        const tiles = [];
+        window.tileSlots.forEach(slot => {
+            if (slot.dataset.tile) {
+                tiles.push({
+                    code: slot.dataset.tile,
+                    src: slot.style.backgroundImage
+                });
+            }
         });
-      }
-      
-      return response.json();
-    })
-    .then(data => {
-      console.log('送信成功:', data);
-      alert('送信成功！');
-    })
-    .catch(error => {
-      console.error('送信エラー:', error);
-      alert(`送信に失敗しました: ${error.message}`);
-    });
-  }
 
-  // タイル選択のイベントリスナー
-  tileImages.forEach(img => {
-    img.addEventListener('click', () => {
-      const tileSrc = img.src;
-      const tileCode = img.dataset.tile;
-
-      const count = Array.from(tileSlots).filter(slot => slot.dataset.tile === tileCode).length;
-      if (count >= 4) {
-        alert(`「${tileCode}」は4枚までしか選べません`);
-        return;
-      }
-
-      if (tileCode.includes("'")) {
-        const redCount = Array.from(tileSlots).filter(slot => slot.dataset.tile && slot.dataset.tile.includes("'")).length;
-        if (redCount >= 1) {
-          alert('赤牌は1枚までしか選べません');
-          return;
+        const suitOrder = { m: 1, p: 2, s: 3, z: 4 };
+        function normalize(tileCode) {
+            if (!tileCode) return null;
+            if (/^[1-9]'?[mps]$/.test(tileCode)) {
+                const isRed = tileCode.includes("'");
+                const num = parseInt(tileCode[0]);
+                const suit = tileCode.slice(-1);
+                return { suit, num, isRed };
+            } else if (/^z[1-7]$/.test(tileCode)) {
+                const num = parseInt(tileCode.slice(1));
+                return { suit: 'z', num, isRed: false };
+            }
+            return { suit: 'z', num: 99, isRed: false };
         }
-      }
 
-      const emptySlot = findNextEmptySlot();
-      if (emptySlot) {
-        emptySlot.style.backgroundImage = `url(${tileSrc})`;
-        emptySlot.dataset.tile = tileCode;
-        refillAndSort();
-      }
-    });
-  });
-
-  // タイルスロットのクリック（削除）
-  tileSlots.forEach(slot => {
-    slot.addEventListener('click', () => {
-      slot.style.backgroundImage = '';
-      delete slot.dataset.tile;
-      refillAndSort();
-    });
-  });
-
-  // リセットボタン
-  resetButton.addEventListener('click', () => {
-    tileSlots.forEach(slot => {
-      slot.style.backgroundImage = '';
-      delete slot.dataset.tile;
-    });
-  });
-
-  // 送信ボタン（重複削除・event.preventDefault追加）
-  submitButton.addEventListener('click', (event) => {
-    event.preventDefault();  // フォーム送信を阻止
-    console.log('Submit button clicked');
-    sendHandToServer();
-  });
-
-  // ヘルパー関数
-  function findNextEmptySlot() {
-    return Array.from(tileSlots).find(slot => !slot.dataset.tile);
-  }
-
-  function refillAndSort() {
-    const tiles = [];
-    tileSlots.forEach(slot => {
-      if (slot.dataset.tile) {
-        tiles.push({
-          code: slot.dataset.tile,
-          src: slot.style.backgroundImage
+        tiles.sort((a, b) => {
+            const A = normalize(a.code);
+            const B = normalize(b.code);
+            if (A.suit !== B.suit) return suitOrder[A.suit] - suitOrder[B.suit];
+            if (A.num !== B.num) return A.num - B.num;
+            return A.isRed - B.isRed;
         });
-      }
-    });
 
-    const suitOrder = { m: 1, p: 2, s: 3, z: 4 };
+        window.tileSlots.forEach((slot, i) => {
+            if (i < tiles.length) {
+                slot.dataset.tile = tiles[i].code;
+                slot.style.backgroundImage = tiles[i].src;
+                slot.style.cursor = 'pointer';
+            } else {
+                delete slot.dataset.tile;
+                slot.style.backgroundImage = '';
+                slot.style.cursor = 'default';
+            }
+        });
+        window.updateWinningTileHighlight();
+    };
 
-    function normalize(tileCode) {
-      if (/^[1-9]'?[mps]$/.test(tileCode)) {
-        const isRed = tileCode.includes("'");
-        const num = parseInt(tileCode[0]);
-        const suit = tileCode.slice(-1);
-        return { suit, num, isRed };
-      } else if (/^z[1-7]$/.test(tileCode)) {
-        const num = parseInt(tileCode.slice(1));
-        return { suit: 'z', num, isRed: false };
-      } else {
-        return { suit: 'z', num: 99, isRed: false };
-      }
+    // --- DOM取得とCSRFトークン ---
+    const tileImages = document.querySelectorAll('.tile-img');
+    const resetButton = document.getElementById('reset-button');
+    const submitButton = document.getElementById('submit-hand');
+    const doraSlots = document.querySelectorAll('.dora-slot');
+    const isTsumoCheckbox = document.getElementById('is-tsumo-checkbox');
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // --- サーバーへのデータ送信関数 ---
+    function sendHandToServer() {
+        if (activeHandSlot) {
+            activeHandSlot.classList.remove('selecting');
+            activeHandSlot = null;
+        }
+        const handPai = [];
+        window.tileSlots.forEach(slot => {
+            if (slot.dataset.tile) handPai.push(slot.dataset.tile);
+        });
+
+        const meldedTilesCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
+        const totalTiles = handPai.length + meldedTilesCount;
+        if (totalTiles === 0) {
+            alert("手牌を選択してください。");
+            return;
+        }
+        if (totalTiles < 14) {
+            alert(`牌が${totalTiles}枚しかありません。14枚の牌を選択してください。`);
+            return;
+        }
+
+        const winningPai = handPai.pop();
+
+        const payload = {
+            hand_pai: JSON.stringify(handPai),
+            winning_pai: winningPai || '',
+            is_tsumo: isTsumoCheckbox.checked,
+            is_huuro: window.meldedSets && window.meldedSets.length > 0,
+            huuro: JSON.stringify(window.meldedSets || []),
+            dora_pai: JSON.stringify(selectedDoraTiles.filter(tile => tile !== null)),
+        };
+
+        console.log('送信するデータ:', payload);
+        fetch('/api/hand-input/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify(payload),
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(`HTTP ${response.status}: ${text}`); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('サーバーからの応答:', data);
+            alert('送信成功！');
+        })
+        .catch(error => {
+            console.error('送信エラー:', error);
+            alert(`送信に失敗しました: ${error.message}`);
+        });
     }
 
-    tiles.sort((a, b) => {
-      const A = normalize(a.code);
-      const B = normalize(b.code);
-      if (A.suit !== B.suit) return suitOrder[A.suit] - suitOrder[B.suit];
-      if (A.num !== B.num) return A.num - B.num;
-      return A.isRed - B.isRed;
+    function sendEmptyStateToServer() {
+        const payload = {
+            hand_pai: '[]',
+            winning_pai: '',
+            is_tsumo: true,
+            is_huuro: false,
+            huuro: '[]',
+            dora_pai: '[]'
+        };
+
+        console.log('空の状態をサーバーに送信します。');
+        fetch('/api/hand-input/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify(payload),
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('サーバー側の状態をクリアしました。');
+            } else {
+                response.text().then(text => {
+                   console.error('サーバー側の状態クリアに失敗しました:', text);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('状態クリアのための通信エラー:', error);
+        });
+    }
+
+    // --- イベントリスナー ---
+    function updateEmptyHandHighlight() {
+        const isHandEmpty = Array.from(window.tileSlots).every(slot => !slot.dataset.tile);
+        const firstSlot = window.tileSlots[0];
+        if (firstSlot) {
+            if (isHandEmpty) {
+                firstSlot.classList.add('selecting');
+            } else if (firstSlot !== activeHandSlot) {
+                firstSlot.classList.remove('selecting');
+            }
+        }
+    }
+
+    window.addClickToSelectHandlers = function() {
+        window.tileSlots.forEach(slot => {
+            slot.removeEventListener('click', handleSlotClick);
+            slot.addEventListener('click', handleSlotClick);
+        });
+    }
+
+    function handleSlotClick() {
+        const slot = this;
+        if (window.isNakiActive && window.isNakiActive()) return;
+        if (activeDoraSlot) {
+            activeDoraSlot.classList.remove('selecting');
+            activeDoraSlot = null;
+        }
+        if (slot === activeHandSlot) {
+            slot.style.backgroundImage = '';
+            delete slot.dataset.tile;
+            slot.classList.remove('selecting');
+            activeHandSlot = null;
+            window.refillAndSort();
+        } else if (slot.dataset.tile) {
+            if (activeHandSlot) {
+                activeHandSlot.classList.remove('selecting');
+            }
+            slot.classList.add('selecting');
+            activeHandSlot = slot;
+        }
+        updateEmptyHandHighlight();
+    }
+
+    doraSlots.forEach(slot => {
+        slot.addEventListener('click', () => {
+            if (activeHandSlot) {
+                activeHandSlot.classList.remove('selecting');
+                activeHandSlot = null;
+            }
+            const doraIndex = parseInt(slot.dataset.doraIndex, 10);
+            if (selectedDoraTiles[doraIndex] !== null) {
+                selectedDoraTiles[doraIndex] = null;
+                slot.style.backgroundImage = '';
+                if (activeDoraSlot === slot) {
+                    activeDoraSlot.classList.remove('selecting');
+                    activeDoraSlot = null;
+                }
+            } else {
+                doraSlots.forEach(s => s.classList.remove('selecting'));
+                slot.classList.add('selecting');
+                activeDoraSlot = slot;
+            }
+        });
     });
 
-    tileSlots.forEach((slot, i) => {
-      if (i < tiles.length) {
-        slot.dataset.tile = tiles[i].code;
-        slot.style.backgroundImage = tiles[i].src;
-      } else {
-        delete slot.dataset.tile;
-        slot.style.backgroundImage = '';
-      }
+    // 牌クリックのイベントリスナー (asyncに変更)
+    tileImages.forEach(img => {
+        img.addEventListener('click', async () => {
+            const tileSrc = img.src;
+            const tileCode = img.dataset.tile;
+
+            // 牌の選択枚数チェック
+            const isRedFive = tileCode.includes("'");
+            const handTiles = Array.from(window.tileSlots).map(s => s.dataset.tile).filter(Boolean);
+            const meldTiles = (window.meldedSets || []).flatMap(s => s.tiles);
+            let doraTiles = selectedDoraTiles.filter(tile => tile !== null);
+            if (activeDoraSlot) {
+                const doraIndex = parseInt(activeDoraSlot.dataset.doraIndex, 10);
+                doraTiles = selectedDoraTiles.filter((tile, index) => tile !== null && index !== doraIndex);
+            }
+            const allCurrentTiles = handTiles.concat(meldTiles).concat(doraTiles);
+            const normalVersion = tileCode.replace("'", "");
+            const redVersion = `5'${normalVersion.slice(-1)}`;
+            const countOfNormal = allCurrentTiles.filter(c => c === normalVersion).length;
+            const countOfRed = allCurrentTiles.filter(c => c === redVersion).length;
+
+            if (countOfNormal + countOfRed >= 4) {
+                alert(`「${normalVersion.slice(0, -1)}」牌は既に4枚選択されています。`);
+                if (activeDoraSlot) { activeDoraSlot.classList.remove('selecting'); activeDoraSlot = null; }
+                return;
+            }
+            if (isRedFive && countOfRed >= 1) {
+                alert(`赤ドラの「${tileCode}」は1枚しか選択できません。`);
+                if (activeDoraSlot) { activeDoraSlot.classList.remove('selecting'); activeDoraSlot = null; }
+                return;
+            }
+
+            if (activeDoraSlot) {
+                activeDoraSlot.style.backgroundImage = `url(${tileSrc})`;
+                const doraIndex = parseInt(activeDoraSlot.dataset.doraIndex, 10);
+                selectedDoraTiles[doraIndex] = tileCode;
+                activeDoraSlot.classList.remove('selecting');
+                activeDoraSlot = null;
+                return;
+            }
+
+            // handleNakiの呼び出しをawaitに変更
+            if (window.handleNaki && await window.handleNaki(tileCode, tileSrc)) {
+                return;
+            }
+
+            const emptySlot = Array.from(window.tileSlots).find(slot => !slot.dataset.tile);
+            if (emptySlot) {
+                emptySlot.style.backgroundImage = `url(${tileSrc})`;
+                emptySlot.dataset.tile = tileCode;
+                window.refillAndSort();
+                updateEmptyHandHighlight();
+            } else {
+                alert('手牌が一杯です。');
+            }
+        });
     });
-  }
+
+    // --- 初期化処理 ---
+    window.addClickToSelectHandlers();
+    updateEmptyHandHighlight();
+    window.updateWinningTileHighlight();
+
+    resetButton.addEventListener('click', () => {
+        if (window.resetNakiState) {
+            window.resetNakiState();
+        }
+        doraSlots.forEach(slot => {
+            slot.style.backgroundImage = '';
+            slot.classList.remove('selecting');
+        });
+        selectedDoraTiles.fill(null);
+        activeDoraSlot = null;
+        activeHandSlot = null;
+        isTsumoCheckbox.checked = true;
+        const handContainer = document.getElementById('hand');
+        handContainer.innerHTML = '';
+        for (let i = 0; i < 14; i++) {
+            const newSlot = document.createElement('div');
+            newSlot.classList.add('tile-slot');
+            newSlot.dataset.index = i;
+            handContainer.appendChild(newSlot);
+        }
+        const fixedTilesDiv = document.createElement('div');
+        fixedTilesDiv.id = 'fixed-tiles';
+        fixedTilesDiv.classList.add('fixed-tiles');
+        handContainer.appendChild(fixedTilesDiv);
+        window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
+        window.addClickToSelectHandlers();
+        updateEmptyHandHighlight();
+        window.updateWinningTileHighlight();
+        sendEmptyStateToServer();
+    });
+
+    submitButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        sendHandToServer();
+    });
+
+    resetButton.click();
 });

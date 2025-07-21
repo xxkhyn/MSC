@@ -1,0 +1,126 @@
+/* ベース設定 */
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: sans-serif;
+  background-color: darkgreen; /* 麻雀マット風の緑 */
+  box-shadow: 
+    rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset,
+    rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset; 
+}
+
+/* 全体を囲むコンテナ */
+.container {
+  max-width: 700px;
+  margin: 0 auto 30px;
+  background-color: rgba(255, 255, 255, 0.9); /* 透けた白で読みやすく */
+  padding: 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(2px); /* 背景のぼかし（対応ブラウザのみ） */
+  box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
+}
+
+/* セクション（場風・供託など）ごとのブロック */
+.section {
+  margin-bottom: 30px;
+}
+
+/* ラベル（セクションタイトル） */
+.label {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* ボタン群 */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 各種ボタンスタイル */
+.btn {
+  padding: 6px 14px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn:hover {
+  background-color: #e0e0e0;
+}
+
+.btn.selected {
+  background-color: #007aff;
+  color: white;
+  border-color: #007aff;
+}
+
+/* カウンターの構成 */
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.counter span {
+  min-width: 40px;
+  text-align: right;
+}
+
+.counter input[type="number"] {
+  width: 50px;
+  padding: 5px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* 条件選択オプションの全体 */
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* 各オプショングループ（立直・一発など） */
+.option-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.option-group .label {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.btnn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

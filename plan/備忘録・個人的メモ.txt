@@ -58,3 +58,37 @@ return JsonResponse(...)に切り替え、画面遷移もテンプレート描�
 SPA型　→　難しい（今回のアプリ）
 
 フォーム送信型で作ってSPA型に持っていくのも出来るらしい
+
+・モデルの再定義をした際の注意点
+→「マイグレーションずれ」に注意！
+
+ーーー対処手順ーーー
+①テーブル構造を再構築する。
+
+・マイグレーションファイルの再作成
+python manage.py makemigrations MSC
+
+MSC/migrations/ に新しいファイルが生成されることを確認
+
+・マイグレーションの適用
+python manage.py migrate
+
+正常に完了すればOK
+すでにplayer_typeを追加したマイグレーションがあるのにmigrateが通らない場合は、一度fakeを解除して再実行します。
+
+②それでも直らない場合（強制再構築）
+最終手段として、SQLiteデータベースをリセットする方法（開発中だけ推奨）
+
+rm db.sqlite3
+find MSC/migrations -name "*.py" -not -name "__init__.py" -delete
+find MSC/migrations -name "*.pyc" -delete
+
+python manage.py makemigrations
+python manage.py migrate
+
+・再確認：player_type カラムが反映されているか確認
+python manage.py dbshell
+.schema MSC_condition;
+
+以下のような行が出てくるか確認
+"player_type" varchar(6) NOT NULL
