@@ -5,7 +5,7 @@ from MSC.logic.yaku.yaku import is_chiitoitsu
 def calculate_fu(hand_instance, condition_instance, agari_pattern) -> int:
     mentsu_list, head = agari_pattern
     winning_tile = TILE_TO_INDEX[hand_instance.winning_pai]
-    if is_chiitoitsu == 1:
+    if is_chiitoitsu(hand_instance, condition_instance):
         return 25
     fu = 20 if hand_instance.is_tsumo else 30  # 面前ロンは30符、面前ツモは20符
 
@@ -23,6 +23,8 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern) -> int:
 
     # 面子ごとの符計算
     for m in mentsu_list:
+        if not m:
+            continue
         is_open = False
         if isinstance(m, dict):
             is_open = m.get("open", False)
@@ -52,7 +54,12 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern) -> int:
     if _is_pinfu(mentsu_list, head, winning_tile, hand_instance.is_huuro, hand_instance.is_tsumo):
         return 20
 
-    return ((fu + 9) // 10) * 10  # 符は10の倍数に切り上げ
+      # 符を10の位に切り上げ
+    if fu % 10 != 0:
+        fu = ((fu // 10) + 1) * 10
+
+    return fu
+
 
 
 def get_machi_type(mentsu_list, head, winning_tile):
