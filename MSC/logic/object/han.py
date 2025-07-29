@@ -33,25 +33,27 @@ CONFLICT_RULES = {
 
 class Yakumann:
     def __init__(self):
-        self.yakus = set()  # 役満名のみを保持
-        self.count = 0      # 役満の個数（複数役満用）
+        self.yakus = {}  # 役名 → 翻数 の辞書
 
     def add_yaku(self, name):
-        if name not in self.yakus:
-            self.yakus.add(name)
-            self.count += 1  # 役満の数をカウント
+        double_yakuman = {
+            "純正九蓮宝燈",
+            "国士無双十三面待ち",
+            "四暗刻単騎",
+            "大四喜",
+        }
+        han = 26 if name in double_yakuman else 13
+        self.yakus[name] = han
 
     def remove_yaku(self, name):
         if name in self.yakus:
-            self.yakus.remove(name)
-            self.count -= 1
+            del self.yakus[name]
 
     def get_count(self):
-        return self.count
+        return len(self.yakus)
 
     def get_yakus(self):
-        return list(self.yakus)
-
+        return self.yakus
     
 class YakuCounter:
     def __init__(self):
@@ -78,37 +80,17 @@ class YakuCounter:
     
 def resolve_conflicts(yaku_counter: YakuCounter, yakumann: Yakumann):
     yaku_names = set(yaku_counter.get_yakus().keys())
-    yakuman_names = set(yakumann.get_yakus().keys())
+    yakuman_names = set(yakumann.get_yakus().keys())  # ←ここがポイント
 
-    # ✅ 1. 役満がある場合は通常役（翻役）をすべて削除
     if yakuman_names:
+        # 役満があれば通常役は全部消す
         for name in list(yaku_names):
             yaku_counter.remove_yaku(name)
-        return  # 通常役すべて除去したので、個別の排他処理は不要
-
-    # ✅ 2. 役満がない場合 → 通常のCONFLICT_RULESで排他制御
-    for upper, lowers in CONFLICT_RULES.items():
-        if upper in yakuman_names or upper in yaku_names:
-            for lower in lowers:
-                if lower in yakuman_names:
-                    yakumann.remove_yaku(lower)
-                if lower in yaku_names:
-                    yaku_counter.remove_yaku(lower)
-
-
-def resolve_conflicts(yaku_counter: YakuCounter, yakumann: Yakumann):
-    yaku_names = set(yaku_counter.get_yakus().keys())
-    yakuman_names = set(yakumann.get_yakus())
+        return
 
     for upper, lowers in CONFLICT_RULES.items():
-        if upper in yakuman_names:
-            for lower in lowers:
-                if lower in yakuman_names:
-                    yakumann.remove_yaku(lower)
-                if lower in yaku_names:
-                    yaku_counter.remove_yaku(lower)
-
         if upper in yaku_names:
             for lower in lowers:
                 if lower in yaku_names:
                     yaku_counter.remove_yaku(lower)
+

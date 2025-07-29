@@ -1,5 +1,5 @@
 import copy
-from MSC.logic.parser import parse_def
+from . import parse_def
 from types import SimpleNamespace
 def analyze_hand_model(hand_obj):
     hand_numeric = parse_def.tile_strs_to_indices(hand_obj)
@@ -24,18 +24,3 @@ def analyze_hand_model(hand_obj):
         "melds_descriptions": melds_descriptions,
         "error_message": ""
     }
-#test用データ
-hand_obj = SimpleNamespace(
-    hand_pai=["s1","s2","s3","p1","p1","p1","s7","s8","s9","z1","z1","z2","z2"],
-    winning_pai="z2",
-    huuro=[],
-    dora_pai=[]
-)
-
-result = analyze_hand_model(hand_obj)
-
-
-print("Agari Patterns:", result["agari_patterns"])
-print("Melds:", result["melds"])
-print("Melds Descriptions:", result["melds_descriptions"])
-print("Error Message:", result["error_message"])
