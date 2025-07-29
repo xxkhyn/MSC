@@ -4,6 +4,7 @@ import django
 from collections import Counter
 from typing import List, Tuple
 import copy
+from MSC.logic.parser.parser import analyze_hand_model
 
 # melds.py の場所から見て、ルートの絶対パスを追加
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))

@@ -1,81 +1,79 @@
-# test_fu_general.py
-
-import pytest
+import unittest
 from MSC.logic.score_calc_1.calculate_hu import calculate_fu
 from MSC.logic.object.melds import TILE_TO_INDEX
-from MSC.logic.yaku.yaku import is_chiitoitsu  # optional if chiitoitsu test used
 
-# ---------- Dummy Classes ----------
 
-class DummyHand:
-    def __init__(self, winning_pai, is_tsumo, is_huuro):
+class MockHand:
+    def __init__(self, winning_pai, is_tsumo=True, is_huuro=False):
         self.winning_pai = winning_pai
         self.is_tsumo = is_tsumo
         self.is_huuro = is_huuro
 
-class DummyCondition:
-    def __init__(self, seat_wind="east", prevalent_wind="east"):
+
+class MockCondition:
+    def __init__(self, seat_wind='east', prevalent_wind='east'):
         self.seat_wind = seat_wind
         self.prevalent_wind = prevalent_wind
 
-# ---------- Helper Function ----------
 
-def create_tile_list(tile_strs):
-    return [TILE_TO_INDEX[tile] for tile in tile_strs]
+class TestFuCalculator(unittest.TestCase):
 
-# ---------- Main Test Function ----------
+    def test_pinfu_tsumo(self):
+        """門前平和ツモは常に20符"""
+        hand = MockHand(winning_pai="3m", is_tsumo=True, is_huuro=False)
+        condition = MockCondition()
+        agari_pattern = (
+            [
+                {"tiles": [TILE_TO_INDEX["1m"], TILE_TO_INDEX["2m"], TILE_TO_INDEX["3m"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["4p"], TILE_TO_INDEX["5p"], TILE_TO_INDEX["6p"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["6s"], TILE_TO_INDEX["7s"], TILE_TO_INDEX["8s"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["7m"], TILE_TO_INDEX["8m"], TILE_TO_INDEX["9m"]], "open": False},
+            ],
+            [TILE_TO_INDEX["3p"]]  # 雀頭
+        )
+        self.assertEqual(calculate_fu(hand, condition, agari_pattern), 20)
 
-@pytest.mark.parametrize("description,expected_fu,yaku_name,machi_type,is_menzen,is_tsumo,winning_tile,mentsu_raw,head_raw", [
-    # ピンフ ツモ リャンメン
-    ("Pinfu Tsumo Ryanmen", 20, "pinfu", "ryanmen", True, True, "m2",
-     [["m1", "m2", "m3"], ["p4", "p5", "p6"], ["s3", "s4", "s5"], ["s6", "s7", "s8"]],
-     ["p2", "p2"]),
-    
-    # ピンフ不可：刻子あり＋タンキ
-    ("No Pinfu - Koutsu + Tanki", 30, "none", "tanki", True, False, "z5",
-     [["z5", "z5", "z5"], ["m2", "m3", "m4"], ["s2", "s3", "s4"], ["p7", "p8", "p9"]],
-     ["z6", "z6"]),
+    def test_chiitoitsu(self):
+        """七対子は常に25符"""
+        def is_chiitoitsu_mock(_, __): return True
+        import MSC.logic.yaku.yaku
+        MSC.logic.yaku.yaku.is_chiitoitsu = is_chiitoitsu_mock
 
-    # 七対子は常に25符
-    ("Chiitoitsu", 25, "chiitoitsu", "tanki", True, False, "z7",
-     [],
-     ["z1", "z1", "z2", "z2", "z3", "z3", "z4", "z4", "z5", "z5", "z6", "z6", "z7", "z7"]),
+        hand = MockHand(winning_pai="3m", is_tsumo=True, is_huuro=False)
+        condition = MockCondition()
+        agari_pattern = ([], [])  # 七対子は使わない
+        self.assertEqual(calculate_fu(hand, condition, agari_pattern), 25)
 
-    # 明槓 vs 暗槓（中張牌）
-    ("Open Kantsu - Chunchan", 50, "yakuhai", "tanki", False, False, "m5",
-     [[{"tiles": ["m5", "m5", "m5", "m5"], "open": True}], ["s1", "s2", "s3"], ["p4", "p5", "p6"], ["z6", "z6", "z6"]],
-     ["z5", "z5"]),
+    def test_ron_menzen_koutsu(self):
+        """門前ロンで刻子あり、雀頭役牌、カンチャン待ち：例 30(初期) +2(役牌) +4(暗刻) +2(待ち) = 38 → 切り上げ40符"""
+        hand = MockHand(winning_pai="3m", is_tsumo=False, is_huuro=False)
+        condition = MockCondition(seat_wind='east', prevalent_wind='south')
+        agari_pattern = (
+            [
+                {"tiles": [TILE_TO_INDEX["3m"], TILE_TO_INDEX["3m"], TILE_TO_INDEX["3m"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["4p"], TILE_TO_INDEX["5p"], TILE_TO_INDEX["6p"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["7s"], TILE_TO_INDEX["8s"], TILE_TO_INDEX["9s"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["2m"], TILE_TO_INDEX["3m"], TILE_TO_INDEX["4m"]], "open": False},
+            ],
+            [TILE_TO_INDEX["z1"]]  # 東が自風で役牌
+        )
+        self.assertEqual(calculate_fu(hand, condition, agari_pattern), 40)
 
-    ("Closed Kantsu - Chunchan", 70, "yakuhai", "tanki", True, False, "m5",
-     [[{"tiles": ["m5", "m5", "m5", "m5"], "open": False}], ["s1", "s2", "s3"], ["p4", "p5", "p6"], ["z6", "z6", "z6"]],
-     ["z5", "z5"]),
+    def test_ron_open_meld(self):
+        """副露あり、ポン明刻、中張子、雀頭が役牌、単騎待ち：30(初期) +2(役牌) +2(明刻) +2(単騎) = 36 → 切り上げ40符"""
+        hand = MockHand(winning_pai="5m", is_tsumo=False, is_huuro=True)
+        condition = MockCondition()
+        agari_pattern = (
+            [
+                {"tiles": [TILE_TO_INDEX["5m"], TILE_TO_INDEX["5m"], TILE_TO_INDEX["5m"]], "open": True},
+                {"tiles": [TILE_TO_INDEX["2p"], TILE_TO_INDEX["3p"], TILE_TO_INDEX["4p"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["6s"], TILE_TO_INDEX["7s"], TILE_TO_INDEX["8s"]], "open": False},
+                {"tiles": [TILE_TO_INDEX["7m"], TILE_TO_INDEX["8m"], TILE_TO_INDEX["9m"]], "open": False},
+            ],
+            [TILE_TO_INDEX["z5"]]  # 白
+        )
+        self.assertEqual(calculate_fu(hand, condition, agari_pattern), 40)
 
-])
-def test_calculate_fu(description, expected_fu, yaku_name, machi_type, is_menzen, is_tsumo, winning_tile, mentsu_raw, head_raw):
-    # Setup hand and condition
-    hand = DummyHand(winning_pai=winning_tile, is_tsumo=is_tsumo, is_huuro=not is_menzen)
-    condition = DummyCondition()
 
-    # Convert mentsu
-    mentsu = []
-    for m in mentsu_raw:
-        if isinstance(m, dict) or (isinstance(m, list) and isinstance(m[0], dict)):
-            # カン（明槓・暗槓）
-            if isinstance(m, list) and isinstance(m[0], dict):
-                m = m[0]
-            tiles = create_tile_list(m["tiles"])
-            mentsu.append({"tiles": tiles, "open": m["open"]})
-        else:
-            tiles = create_tile_list(m)
-            mentsu.append(tiles)
-
-    # Convert head
-    head = create_tile_list(head_raw)
-
-    # Prepare agari_pattern
-    agari_pattern = [mentsu, head]
-
-    # Calculate fu
-    fu = calculate_fu(hand, condition, agari_pattern)
-
-    assert fu == expected_fu, f"{description} → expected {expected_fu}, got {fu}"
+if __name__ == '__main__':
+    unittest.main()

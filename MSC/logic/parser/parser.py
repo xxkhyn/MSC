@@ -1,5 +1,5 @@
 import copy
-import parse_def
+from MSC.logic.parser import parse_def
 from types import SimpleNamespace
 def analyze_hand_model(hand_obj):
     hand_numeric = parse_def.tile_strs_to_indices(hand_obj)
@@ -33,6 +33,7 @@ hand_obj = SimpleNamespace(
 )
 
 result = analyze_hand_model(hand_obj)
+
 
 print("Agari Patterns:", result["agari_patterns"])
 print("Melds:", result["melds"])

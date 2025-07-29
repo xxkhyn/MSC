@@ -1,12 +1,12 @@
 from MSC.models import ScoreResult
-from MSC.logic.parser.parser import parse_hand
+from MSC.logic.parser.parser import analyze_hand_model as parse_hand
 from MSC.logic.validation.validator import validate_hand
 from MSC.logic.evaluator import evaluate_hand
-import parser
+
 
 def calculate_score(hand, condition):
     # ① Handオブジェクトを解析する
-    parsed_hand = parser.analyze_hand_model(hand)
+    parsed_hand = parse_hand(hand)
 
     # ② 妥当性チェック
     validation_error = validate_hand(parsed_hand, condition)
