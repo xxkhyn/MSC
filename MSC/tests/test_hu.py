@@ -79,7 +79,7 @@ class TestFuCalculator(unittest.TestCase):
             winning_pai="m5",
             is_tsumo=False,
             is_huuro=True,
-            hand_pai=["m5", "m5", "p2", "p3", "p4", "s6", "s7", "s8", "m7", "m8", "m9", "z5", "m5"],
+            hand_pai=["m5", "m5", "p2", "p3", "p4", "s6", "s7", "s8", "m7", "m8", "m9", "z5", "z5"],
             huuro=[{"type": "pon", "tiles": ["m5", "m5", "m5"], "open": True}]
         )
         condition = MockCondition()
@@ -92,7 +92,7 @@ class TestFuCalculator(unittest.TestCase):
             ],
             [TILE_TO_INDEX["z5"]]
         )
-        self.assertEqual(calculate_fu(hand, condition, agari_pattern, is_chiitoitsu = False), 40)
+        self.assertEqual(calculate_fu(hand, condition, agari_pattern, is_chiitoitsu = False), 30)
 
 
 if __name__ == '__main__':

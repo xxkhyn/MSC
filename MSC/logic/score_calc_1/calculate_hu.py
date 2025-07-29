@@ -12,8 +12,12 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern,is_chiitoitsu)
     if is_chiitoitsu:
         return 25
 
-    # 初期符（面前ロン＝30符、ツモ＝20符）
-    fu = 20 if hand_instance.is_tsumo else 30
+
+    # 初期符（門前ロンのみ30符、それ以外は20符）
+    if not hand_instance.is_tsumo and not hand_instance.is_huuro:
+        fu = 30  # 門前ロン
+    else:
+        fu = 20
 
     # 門前平和ツモなら20符固定で終了
     if _is_pinfu(mentsu_list, head, winning_tile, hand_instance.is_huuro, hand_instance.is_tsumo):
