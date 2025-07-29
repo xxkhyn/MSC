@@ -1,6 +1,7 @@
 from MSC.logic.object.melds import TILE_TO_INDEX
 from MSC.models import Condition
 from MSC.logic.yaku.yaku import is_chiitoitsu
+import math
 
 def calculate_fu(hand_instance, condition_instance, agari_pattern) -> int:
     mentsu_list, head = agari_pattern
@@ -8,7 +9,9 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern) -> int:
     if is_chiitoitsu(hand_instance, condition_instance):
         return 25
     fu = 20 if hand_instance.is_tsumo else 30  # 面前ロンは30符、面前ツモは20符
-
+    # ピンフ判定（ピンフなら常に20符固定）
+    if _is_pinfu(mentsu_list, head, winning_tile, hand_instance.is_huuro, hand_instance.is_tsumo):
+        return 20
     # 雀頭が役牌（場風、自風、三元牌）なら +2符
     def is_yakuhai(index):
         winds = ['east', 'south', 'west', 'north']
@@ -50,13 +53,10 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern) -> int:
     if machi_type in ["tanki", "kanchan", "penchan"]:
         fu += 2
 
-    # ピンフ判定（ピンフなら常に20符固定）
-    if _is_pinfu(mentsu_list, head, winning_tile, hand_instance.is_huuro, hand_instance.is_tsumo):
-        return 20
+ 
 
       # 符を10の位に切り上げ
-    if fu % 10 != 0:
-        fu = ((fu // 10) + 1) * 10
+    fu = math.ceil(fu / 10) * 10
 
     return fu
 
