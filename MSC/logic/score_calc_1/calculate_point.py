@@ -15,7 +15,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         return math.ceil(value / 100) * 100
 
     @staticmethod
-    def calculate_point_from_yakumann(yakumann_obj, is_tsumo: bool, is_oya: bool):
+    def calc_point_from_yakumann(yakumann_obj, is_tsumo: bool, is_oya: bool):
         yakumann_count = yakumann_obj.count()
         base = ScoreCalculator.calculate_base_point_from_yakumann(yakumann_count)
         base = ScoreCalculator.round_up_100(base)
@@ -31,8 +31,9 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
             result["score"] = f"{base * 6}" if is_oya else f"{base * 4}"
 
         return result
-    '''@staticmethod
+    @staticmethod
     def calculate_base_point(han: int, fu: int) -> int:#YakuCounterから翻数を受け取り点数計算
+     
         if han >= 13:
             return 8000  # 数え役満
         elif han >= 11:
@@ -44,12 +45,12 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         elif han >= 5 or (han == 4 and fu >= 40) or (han == 3 and fu >= 70):
             return 2000  # 満貫
         else:
-            return fu * (2 ** (2 + han))  # 満貫以下'''
+            return fu * (2 ** (2 + han))  # 満貫以下
 
     @staticmethod
-    def calculate_point(han: int, fu: int, is_tsumo: bool, is_oya: bool, condition:Condition):
+    def calc_point(han: int, fu: int, is_tsumo: bool, is_oya: bool, condition:Condition):
         base = ScoreCalculator.calculate_base_point(han, fu)
-
+     
         # 満貫判定
         is_mangan = False
         if han >= 13:
