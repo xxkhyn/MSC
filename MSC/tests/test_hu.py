@@ -74,7 +74,7 @@ class TestFuCalculator(unittest.TestCase):
         self.assertEqual(calculate_fu(hand, condition, agari_pattern, is_chiitoitsu = False), 40)
 
     def test_ron_open_meld(self):
-        """副露あり + 明刻中張子 + 役牌雀頭 + 単騎待ち = 40符"""
+        """副露あり + 明刻中張子 + 役牌雀頭 + 単騎待ち = 30符"""
         hand = MockHand(
             winning_pai="m5",
             is_tsumo=False,
