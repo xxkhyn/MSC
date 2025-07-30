@@ -66,40 +66,14 @@ def run_full_flow(hand_pai, winning_pai, huuro=None,condition=None):
 
     # 役判定
     yaku_result= judge_yaku(parsed_hand, huuro, condition)
-    
-    # 結果返却（必要に応じてyakuも返す）
+    total_han = sum(yaku_result.values())
+
+# 結果返却
     return {
-        "agari_patterns": result["agari_patterns"],
-        "melds": result["melds"],
-        "melds_descriptions": result["melds_descriptions"],
-        "error_message": result["error_message"],
-        "yaku_result": yaku_result,
-    }
-
-
-if __name__ == "__main__":
-    test_hand_pai = ["m1", "m1", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m9", "m9"]
-    test_winning_pai = "m5"
-    test_huuro = []
-    test_condition = Condition(
-        is_riichi=False,
-        is_double_riichi=False,
-        is_ippatsu=False,
-        is_rinshan=False,
-        is_chankan=False,
-        is_haitei=False,
-        is_houtei=False,
-        is_tenho=False,
-        is_tsumo=True,
-        seat_wind="east",
-
-        prevalent_wind="east",
-        player_type="child",
-        kyotaku=0,
-        honba=0,
-    )
-
-    result = run_full_flow(test_hand_pai, test_winning_pai, test_huuro, condition=test_condition)
-    print(result)
-
-    
+    "han": total_han,
+    "yaku_list": yaku_result,
+    "agari_patterns": result["agari_patterns"],
+    "melds": result["melds"],
+    "melds_descriptions": result["melds_descriptions"],
+    "error_message": result["error_message"],
+}
