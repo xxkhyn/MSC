@@ -1,24 +1,35 @@
-// condition.js (リセット機能付き)
+// condition.js
 
 function getCSRFToken() {
   const cookieValue = document.cookie
     .split('; ')
     .find(row => row.startsWith('csrftoken='))
-    ?.split('=')[1]; // Optional chaining for safety
+    ?.split('=')[1];
   return cookieValue || '';
 }
 
+// 一番上のボタンに .selected を付ける（まだ選ばれていない場合）
+const autoSelectFirstButton = (groupSelector) => {
+  document.querySelectorAll(groupSelector).forEach(group => {
+    // ← 追加: 除外マークが付いていたらスキップ
+    if (group.hasAttribute('data-skip-auto-select')) return;
+
+    const alreadySelected = group.querySelector('.btn.selected');
+    const firstBtn = group.querySelector('.btn');
+    if (!alreadySelected && firstBtn) {
+      firstBtn.classList.add('selected');
+    }
+  });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- ★★★ 1. リセット＆送信ロジックを追加 ★★★ ---
-
-  const resetButton = document.getElementById('condition-reset-btn'); // HTMLに <button id="condition-reset-btn">リセット</button> を追加してください
+  const resetButton = document.getElementById('condition-reset-btn');
 
   /**
-   * フォームのUIをデフォルト状態にリセットする関数
+   * UIの選択状態をデフォルトに戻す
    */
   const resetUI = () => {
-    // ボタンの選択をリセット
     const resetToggleButtons = (selector, defaultValue) => {
       document.querySelectorAll(selector).forEach(btn => {
         btn.classList.remove('selected');
@@ -30,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resetToggleButtons('.wind-btn[data-wind-type="prevalent"]', 'east');
     resetToggleButtons('.wind-btn[data-wind-type="seat"]', 'east');
-    resetToggleButtons('.player-type-btn', 'child');
+    resetToggleButtons('.player-type-btn', 'parent');
     resetToggleButtons('.riichi-btn', 'none');
     resetToggleButtons('.ippatsu-btn', 'false');
     resetToggleButtons('.rinshan-btn', 'false');
@@ -38,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     resetToggleButtons('.haitei-btn', 'false');
     resetToggleButtons('.tenho-btn', 'false');
 
-    // カウンターをリセット
     document.getElementById('kyotaku-count').value = 0;
     document.getElementById('honba-count').value = 0;
 
@@ -46,13 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /**
-   * デフォルトの場況データをサーバーに送信する関数
+   * 初期データをサーバーに送信
    */
   const sendDefaultConditions = () => {
     const payload = {
       prevalent_wind: 'east',
       seat_wind: 'east',
-      player_type: 'child',
+      player_type: 'parent',
       is_riichi: false,
       is_double_riichi: false,
       is_ippatsu: false,
@@ -75,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify(payload)
     })
     .then(res => {
-      if(res.ok) {
+      if (res.ok) {
         console.log('サーバー側の場況をリセットしました。');
       } else {
         res.json().then(err => console.error('サーバー側のリセットに失敗:', err));
@@ -86,7 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // --- 汎用選択処理 (変更なし) ---
+  /**
+   * ボタンの選択切り替え（クリックで .selected 切り替え）
+   */
   const setupToggleButtons = (selector) => {
     document.querySelectorAll(selector).forEach(btn => {
       btn.addEventListener('click', () => {
@@ -96,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  // 各カテゴリごとにボタン制御を設定
   setupToggleButtons('.wind-btn[data-wind-type="prevalent"]');
   setupToggleButtons('.wind-btn[data-wind-type="seat"]');
   setupToggleButtons('.player-type-btn');
@@ -106,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupToggleButtons('.haitei-btn');
   setupToggleButtons('.tenho-btn');
 
-  // --- カウンター処理 (変更なし) ---
+  // カウンター操作（+/-）
   document.querySelectorAll('.count-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.getAttribute('data-target');
@@ -122,12 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- ★★★ 2. 送信処理を data-value を使うように修正 ★★★ ---
+  // 送信ボタン押下時
   document.getElementById('condition-submit-btn').addEventListener('click', (e) => {
     e.preventDefault();
 
-    // data-value属性から値を取得する方が確実
-    const getValue = (selector) => document.querySelector(`${selector}.selected`)?.getAttribute('data-value');
+    const getValue = (selector) =>
+      document.querySelector(`${selector}.selected`)?.getAttribute('data-value');
 
     const riichiValue = getValue('.riichi-btn') || 'none';
 
@@ -169,16 +182,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- ★★★ 3. リセットボタンとページ読み込み時の処理 ★★★ ---
+  // リセットボタン押下時
   if (resetButton) {
     resetButton.addEventListener('click', () => {
       resetUI();
+      autoSelectFirstButton('.btn-group');
+      autoSelectFirstButton('.btnn-group');
       sendDefaultConditions();
     });
   }
 
-  // ページ読み込み時にUIをリセットし、サーバーにもデフォルト値を送信
+  // ページ読み込み時に初期化処理を実行
   resetUI();
+  autoSelectFirstButton('.btn-group');
+  autoSelectFirstButton('.btnn-group');
   sendDefaultConditions();
-
 });
