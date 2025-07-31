@@ -1,33 +1,45 @@
 from MSC.models import ScoreResult
-from MSC.logic.parser.parser import analyze_hand_model as parse_hand
 from MSC.logic.validation.validator import validate_hand
 from MSC.logic.evaluator import evaluate_hand
+from MSC.logic.object import full_flow
+from MSC.logic.yaku.yaku import is_chiitoitsu
+from MSC.logic.object.han import YakuCounter
+from MSC.models import Condition
+from MSC.logic.score_calc_1.calculate_hu import calculate_fu
+from MSC.logic.score_calc_1.calculate_point import ScoreCalculator
+from MSC.logic.object.han import Yakumann
 
 
 def calculate_score(hand, condition):
-    # ① Handオブジェクトを解析する
-    parsed_hand = parse_hand(hand)
+    result=full_flow.run_full_flow(hand.hand_pai,hand.winning_pai,hand.huuro ,condition)
+    yakumann = Yakumann()
+    yakumann_obj = yakumann.get_count()
+   
+    # ① Handオブジェクトを解析役判定＋役判定＋妥当性チェックする
+    # ② 符数・翻数・点数計算
+    han = result['han']
 
-    # ② 妥当性チェック
-    validation_error = validate_hand(parsed_hand, condition)
-    if validation_error:
-        # エラーがある場合は、ScoreResultをエラー付きで返す
-        return ScoreResult(
-            han=0,
-            fu=0,
-            point=0,
-            yaku_list=[],
-            error_message=validation_error
-        )
+    agari_patterns = result.get('agari_patterns')
+    agari_pattern = agari_patterns[0]
+    fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu) 
+
+    if condition.player_type == 'parent':
+        is_oya = True
+    else:
+        is_oya = False
+
+    if yakumann_obj == 0:
+        sum_score = ScoreCalculator.calc_point(han, fu, condition.is_tsumo, is_oya, condition)
+    else:
+        sum_score = ScoreCalculator.calc_point_from_yakumann(yakumann_obj, condition.is_tsumo, is_oya)
     
-    # ③ 役判定＋符数・翻数・点数計算
-    evaluation_result = evaluate_hand(parsed_hand, condition)
-
     # ④ 結果をScoreResult形式にまとめて返す
     return ScoreResult(
-        han=evaluation_result['han'],
-        fu=evaluation_result['fu'],
-        point=evaluation_result['point'],
-        yaku_list=evaluation_result['yaku_list'],
-        error_message=""
+        han=han,
+        fu = fu,
+        point = sum_score['score'],
+        yaku_list=result['yaku_list'],
+        error_message=result["error_message"]
     )
+
+   

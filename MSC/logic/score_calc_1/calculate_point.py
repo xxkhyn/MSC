@@ -2,7 +2,7 @@
 from MSC.logic.object.han import YakuCounter
 from MSC.logic.object.han import Yakumann
 from MSC.models import Condition
-from MSC.logic.score_calc_1.calculate_point import calculate_fu
+from MSC.logic.score_calc_1.calculate_hu import calculate_fu
 import math
 
 class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そこから条件分岐により点数計算
@@ -15,7 +15,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         return math.ceil(value / 100) * 100
 
     @staticmethod
-    def calculate_score_from_yakumann(yakumann_obj, is_tsumo: bool, is_oya: bool):
+    def calc_point_from_yakumann(yakumann_obj, is_tsumo: bool, is_oya: bool):
         yakumann_count = yakumann_obj.count()
         base = ScoreCalculator.calculate_base_point_from_yakumann(yakumann_count)
         base = ScoreCalculator.round_up_100(base)
@@ -33,6 +33,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         return result
     @staticmethod
     def calculate_base_point(han: int, fu: int) -> int:#YakuCounterから翻数を受け取り点数計算
+     
         if han >= 13:
             return 8000  # 数え役満
         elif han >= 11:
@@ -47,9 +48,9 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
             return fu * (2 ** (2 + han))  # 満貫以下
 
     @staticmethod
-    def calculate_score(han: int, fu: int, is_tsumo: bool, is_oya: bool, condition:Condition):
+    def calc_point(han: int, fu: int, is_tsumo: bool, is_oya: bool, condition:Condition):
         base = ScoreCalculator.calculate_base_point(han, fu)
-
+     
         # 満貫判定
         is_mangan = False
         if han >= 13:
@@ -79,7 +80,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
 
         # 積棒と供託を取得
         honba = condition.honba  # 1本場ごとに +300点
-        kyotaku = condition.kyotaku  # ロン時のみ和了者に加算
+        kyotaku = condition.kyotaku  
 
 # 点数詳細と出力用文字列を作成
         if is_tsumo:
@@ -112,8 +113,8 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
 
 
         return {
-            "base_point": base,#点数計算に使用した数字、表示させる際はいらないけどテスト用に残した
+            "base_point": base,#点数計算に使用し基本点、表示させる際はいらないけどテスト用に残した
             "hand_type": hand_type,#満貫、跳満など
             "score": score_text,#合計点数　例.8000
-            "score_detail": score_detail #子の支払い点数、親の支払い点数　例.2000,4000
-        }
+            "score_detail": score_detail #ツモの場合：子の支払い点数、親の支払い点数、供託の点数　例.2000,4000,1000
+        }                                #ロンの場合：支払い点数、本場点数、供託の点数
