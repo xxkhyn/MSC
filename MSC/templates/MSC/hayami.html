@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>点数計算早見表</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(to bottom, #003366, #004080);
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            color: black;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border: 1px solid #aaa;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #0055aa;
+            color: white;
+        }
+
+        .blue-col {
+            background-color: #0070c0;
+            color: white;
+            font-weight: bold;
+        }
+
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 30px;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .sub-table {
+            margin-top: 10px;
+            width: 100%;
+            background-color: white;
+            color: black;
+        }
+
+        .sub-table th {
+            background-color: #004080;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>点数計算早見表</h1>
+
+    <table>
+        <tr>
+            <th colspan="4">親</th>
+            <th class="blue-col" rowspan="2">符</th>
+            <th colspan="4">子</th>
+        </tr>
+        <tr>
+            <th>1翻</th>
+            <th>2翻</th>
+            <th>3翻</th>
+            <th>4翻</th>
+            <th>1翻</th>
+            <th>2翻</th>
+            <th>3翻</th>
+            <th>4翻</th>
+        </tr>
+        <tr>
+            <td>—</td>
+            <td>2,000<br>(700)</td>
+            <td>3,900<br>(1,300)</td>
+            <td>7,700<br>(2,600)</td>
+            <td class="blue-col">20符</td>
+            <td>—</td>
+            <td>1,300<br>(400/700)</td>
+            <td>2,600<br>(700/1,300)</td>
+            <td>5,200<br>(1,300/2,600)</td>
+           
+        </tr>
+        <tr>
+            <td>—</td>
+            <td>2,400<br>(800)</td>
+            <td>4,800<br>(1,600)</td>
+            <td>9,600<br>(3,200)</td>
+            <td class="blue-col">25符</td>
+            <td>—</td>
+            <td>1,600<br>(400/800)</td>
+            <td>3,200<br>(800/1,600)</td>
+            <td>6,400<br>(1,600/3,200)</td>
+            
+        </tr>
+        <tr>
+            <td>1,500<br>(500)</td>
+            <td>2,900<br>(1,000)</td>
+            <td>5,800<br>(2,000)</td>
+            <td>11,600<br>(3,900)</td>
+            <td class="blue-col">30符</td>
+            <td>1,000<br>(300/500)</td>
+            <td>2,000<br>(500/1,000)</td>
+            <td>3,900<br>(1,000/2,000)</td>
+            <td>7,700</td>
+        </tr>
+        <tr>
+            <td>2000<br>(700)</td>
+            <td>3900<br>(1,300)</td>
+            <td>7700<br>(2,600)</td>
+            <td>満貫<br>(4,000)</td>
+            <td class="blue-col">40符</td>
+            <td>1,300<br>(400/700)</td>
+            <td>2,600<br>(800/1,300)</td>
+            <td>5,200<br>(1,600/2,600)</td>
+            <td>満貫<br>(8,000)</td>
+        </tr>
+        <tr>
+            <td>2,400<br>(800)</td>
+            <td>4,800<br>(1,600)</td>
+            <td>9,600<br>(3,200)</td>
+            <td>満貫<br>(4,000)</td>
+            <td class="blue-col">50符</td>
+            <td>1,600<br>(400/800)</td>
+            <td>3,200<br>(800/1,600)</td>
+            <td>6,400<br>(1,600/3,200)</td>
+            <td>満貫<br>(8,000)</td>
+        </tr>
+        <tr>
+            <td>2,900<br>(1,000)</td>
+            <td>5,800<br>(2,000)</td>
+            <td>11.600<br>(3,900)</td>
+            <td>満貫<br>(4,000)</td>
+            <td class="blue-col">60符</td>
+            <td>2,000<br>(500/1,000)</td>
+            <td>3,900<br>(1,000/2,000)</td>
+            <td>7,700<br>(2,000/3,900)</td>
+            <td>満貫<br>(8,000)</td>
+        </tr>
+        <tr>
+            <td>3,400<br>(1,200)</td>
+            <td>6,800<br>(2,300)</td>
+            <td>満貫<br>(4,000)</td>
+            <td>満貫<br>(4,000)</td>
+            <td class="blue-col">70符</td>
+            <td>2,300<br>(600/1,200)</td>
+            <td>4,500<br>(1,200/2,300)</td>
+            <td>満貫<br>(8,000)</td>
+            <td>満貫<br>(8,000)</td>
+        </tr>
+    </table>
+
+    <div class="section-title">4〜5翻（満貫<br>(8,000)）〜 13翻以上（役満）</div>
+    <table class="sub-table">
+        <tr>
+            <th>翻数</th>
+            <th>親</th>
+            <th>子</th>
+        </tr>
+        <tr>
+            <td>4〜5翻（満貫<br>(8,000)）</td>
+            <td>満貫<br>(12,000)</td>
+            <td>満貫<br>(8,000)</td>
+        </tr>
+        <tr>
+            <td>6〜7翻（跳満）</td>
+            <td>18,000</td>
+            <td>12,000</td>
+        </tr>
+        <tr>
+            <td>8〜10翻（倍満）</td>
+            <td>24,000</td>
+            <td>16,000</td>
+        </tr>
+        <tr>
+            <td>11〜12翻（三倍満）</td>
+            <td>36,000</td>
+            <td>24,000</td>
+        </tr>
+        <tr>
+            <td>13翻以上（役満）</td>
+            <td>48,000</td>
+            <td>32,000</td>
+        </tr>
+    </table>
+
+</body>
+
+</html>

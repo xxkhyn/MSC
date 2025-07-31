@@ -4,14 +4,51 @@ body {
   background: #f0f0f0; 
 }
 
+/* ヘッダー全体 */
 .header {
-  background: #007aff;
+  position: relative;
+  background-color: #007bff;
   color: white;
-  padding: 10px;
-  font-size: 20px;
-  text-align: center;
+  padding: 10px 20px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* 中央のタイトル */
+.header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* 右側のボタン群 */
+.header-buttons {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+
+/* ボタン共通スタイル */
+.help-button {
+  background-color: white;
+  color: #007bff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.help-button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+/* セクション高さ例（任意で） */
 .section-tokuten {
   height: 50px;
   overflow: auto;
