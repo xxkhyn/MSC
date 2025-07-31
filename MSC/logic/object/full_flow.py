@@ -71,7 +71,6 @@ def run_full_flow(hand: Hand, condition: Condition = None):
     yaku_result = judge_yaku(parsed_hand, huuro, condition)
     total_han = sum(yaku_result.values())
 
-<<<<<<< Updated upstream
     # 通常ドラ
     if getattr(hand, "dora_pai", []):
         dora_count = count_dora(hand.hand_pai, hand.winning_pai, hand.dora_pai)
@@ -80,15 +79,6 @@ def run_full_flow(hand: Hand, condition: Condition = None):
             yaku_result["ドラ"] = dora_count
 
     # 赤ドラ
-=======
-    """if dora:
-        dora_count = count_dora(hand_pai, winning_pai, dora)
-        total_han += dora_count
-        if dora_count > 0:
-            yaku_result["ドラ"] = dora_count
-"""
-            
->>>>>>> Stashed changes
     aka_dora_count = result.get("aka_dora_count", 0)
     if aka_dora_count > 0:
         yaku_result["赤ドラ"] = aka_dora_count
