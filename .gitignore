@@ -8,3 +8,5 @@ venv/
 __pycache__/
 venv/
 *.sqlite3
+*.pyc
+__pycache__/

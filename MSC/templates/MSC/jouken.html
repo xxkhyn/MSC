@@ -1,8 +1,8 @@
 {% load static %}
 
-<!-- 条件入力HTML -->
 <div class="container">
 
+  <div class="section">
   <div class="section">
     <div class="label">供託 / 積棒</div>
     <div class="btn-group">
@@ -25,41 +25,42 @@
     <div class="label">場風 / 自風</div>
     <div class="btn-group">
       <div>場風:</div>
-      <button class="btn wind-btn selected" data-wind-type="prevalent" data-wind="east">東</button>
-      <button class="btn wind-btn" data-wind-type="prevalent" data-wind="south">南</button>
-      <button class="btn wind-btn" data-wind-type="prevalent" data-wind="west">西</button>
-      <button class="btn wind-btn" data-wind-type="prevalent" data-wind="north">北</button>
+      <button class="btn wind-btn" data-wind-type="prevalent" data-value="east">東</button>
+      <button class="btn wind-btn" data-wind-type="prevalent" data-value="south">南</button>
+      <button class="btn wind-btn" data-wind-type="prevalent" data-value="west">西</button>
+      <button class="btn wind-btn" data-wind-type="prevalent" data-value="north">北</button>
       <div style="width: 20px;"></div>
       <div>自風:</div>
-      <button class="btn wind-btn selected" data-wind-type="seat" data-wind="east">東</button>
-      <button class="btn wind-btn" data-wind-type="seat" data-wind="south">南</button>
-      <button class="btn wind-btn" data-wind-type="seat" data-wind="west">西</button>
-      <button class="btn wind-btn" data-wind-type="seat" data-wind="north">北</button>
+      <button class="btn wind-btn" data-wind-type="seat" data-value="east">東</button>
+      <button class="btn wind-btn" data-wind-type="seat" data-value="south">南</button>
+      <button class="btn wind-btn" data-wind-type="seat" data-value="west">西</button>
+      <button class="btn wind-btn" data-wind-type="seat" data-value="north">北</button>
     </div>
   </div>
+
   <div class="option-row">
     <div class="option-group">
       <div class="label">親・子</div>
       <div class="btnn-group">
-        <button class="btn player-type-btn selected" data-player="parent">親</button>
-        <button class="btn player-type-btn" data-player="child">子</button>
+        <button class="btn player-type-btn" data-value="parent">親</button>
+        <button class="btn player-type-btn" data-value="child">子</button>
       </div>
     </div>
 
     <div class="option-group">
       <div class="label">立直</div>
       <div class="btnn-group">
-        <button class="btn riichi-btn selected" data-riichi="none">なし</button>
-        <button class="btn riichi-btn" data-riichi="riichi">立直</button>
-        <button class="btn riichi-btn" data-riichi="double">ダブル立直</button>
+        <button class="btn riichi-btn" data-value="none">なし</button>
+        <button class="btn riichi-btn" data-value="riichi">立直</button>
+        <button class="btn riichi-btn" data-value="double">ダブル立直</button>
       </div>
     </div>
 
     <div class="option-group">
       <div class="label">一発</div>
       <div class="btnn-group">
-        <button class="btn ippatsu-btn selected">なし</button>
-        <button class="btn ippatsu-btn">一発</button>
+        <button class="btn ippatsu-btn" data-value="false">なし</button>
+        <button class="btn ippatsu-btn" data-value="true">一発</button>
       </div>
     </div>
   </div>
@@ -102,9 +103,7 @@
 
 
   <button id="condition-submit-btn" type="button">送信</button>
-</div>
+  <button id="condition-reset-btn" type="button">リセット</button> </div>
 
-<!-- <script src="../../static/MSC/js/btn.js"></script> -->
 <script src="{% static 'MSC/js/condition.js' %}"></script>
-
 <link rel="stylesheet" href="{% static 'MSC/css/jouken.css' %}">

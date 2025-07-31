@@ -59,7 +59,7 @@ class Hand(models.Model):
   hand_pai = models.JSONField(verbose_name="手牌")
 
   # 和了牌 
-  winning_pai = models.CharField(max_length=3, verbose_name="和了牌") 
+  winning_pai = models.CharField(max_length=3,blank=True, null=True, verbose_name="和了牌") 
 
   # ツモ和了かどうか (Trueならツモ、Falseならロン)
   is_tsumo = models.BooleanField(default=True, verbose_name="ツモ和了")

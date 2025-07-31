@@ -1,4 +1,4 @@
-// tehai.js (最終版)
+// tehai.js (最終版・完全版)
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- グローバル変数 ---
@@ -120,12 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const winningPai = handPai.pop();
 
         const payload = {
-            hand_pai: JSON.stringify(handPai),
-            winning_pai: winningPai || '',
+            hand_pai: handPai,
+            winning_pai: winningPai,
             is_tsumo: isTsumoCheckbox.checked,
             is_huuro: window.meldedSets && window.meldedSets.length > 0,
-            huuro: JSON.stringify(window.meldedSets || []),
-            dora_pai: JSON.stringify(selectedDoraTiles.filter(tile => tile !== null)),
+            huuro: window.meldedSets || [],
+            dora_pai: selectedDoraTiles.filter(tile => tile !== null),
         };
 
         console.log('送信するデータ:', payload);
@@ -152,12 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function sendEmptyStateToServer() {
         const payload = {
-            hand_pai: '[]',
+            hand_pai: [],
             winning_pai: '',
             is_tsumo: true,
             is_huuro: false,
-            huuro: '[]',
-            dora_pai: '[]'
+            huuro: [],
+            dora_pai: []
         };
 
         console.log('空の状態をサーバーに送信します。');
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 牌クリックのイベントリスナー (asyncに変更)
+    // 牌クリックのイベントリスナー (asyncに対応)
     tileImages.forEach(img => {
         img.addEventListener('click', async () => {
             const tileSrc = img.src;
@@ -344,5 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sendHandToServer();
     });
 
+    // ページ読み込み時にリセットを実行
     resetButton.click();
 });
