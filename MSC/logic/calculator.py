@@ -61,6 +61,14 @@ def calculate_score(hand, condition):
 
     # ④ 結果をScoreResult形式にまとめて返す
 
+    print(han, fu, sum_score['score'], result['yaku_list'], result["error_message"])
+    print(type(result['yaku_list']))
+
+    result_yaku_list= list(result['yaku_list'].items())
+
+    print(result_yaku_list)
+    print(type(result_yaku_list))
+
     return ScoreResult(
         han=han,
         fu = fu,
