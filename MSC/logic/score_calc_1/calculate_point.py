@@ -15,11 +15,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         return math.ceil(value / 100) * 100
 
     @staticmethod
-<<<<<<< Updated upstream
     def calc_point_from_yakumann(yakumann_obj, is_tsumo: bool, is_oya: bool):
-=======
-    def calculate_point_from_yakumann(yakumann_obj, is_tsumo: bool, is_oya: bool):
->>>>>>> Stashed changes
         yakumann_count = yakumann_obj.count()
         base = ScoreCalculator.calculate_base_point_from_yakumann(yakumann_count)
         base = ScoreCalculator.round_up_100(base)
@@ -52,11 +48,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
             return fu * (2 ** (2 + han))  # 満貫以下'''
 
     @staticmethod
-<<<<<<< Updated upstream
     def calc_point(han: int, fu: int, is_tsumo: bool, is_oya: bool, condition:Condition):
-=======
-    def calculate_point(han: int, fu: int, is_tsumo: bool, is_oya: bool, condition:Condition):
->>>>>>> Stashed changes
         base = ScoreCalculator.calculate_base_point(han, fu)
      
         # 満貫判定

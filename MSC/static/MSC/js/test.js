@@ -5,72 +5,94 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeDoraSlot = null;
     let selectedDoraTiles = new Array(10).fill(null);
     let activeHandSlot = null;
+    let lastSelectedTileCode = null;
+    let lastSelectedSlot = null;
+
+
 
     // --- グローバルに公開する変数と関数 ---
     window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
 
-    window.updateWinningTileHighlight = function() {
-        window.tileSlots.forEach(slot => slot.classList.remove('winning-tile-slot'));
-        const handTilesCount = Array.from(window.tileSlots).filter(s => s.dataset.tile).length;
-        const meldedTilesCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
-        const totalTiles = handTilesCount + meldedTilesCount;
+    window.updateWinningTileHighlight = function () {
+    window.tileSlots.forEach(slot => slot.classList.remove('winning-tile-slot'));
 
-        if (totalTiles === 14) {
-            const filledSlots = Array.from(window.tileSlots).filter(s => s.dataset.tile);
-            if (filledSlots.length > 0) {
-                const winningSlot = filledSlots[filledSlots.length - 1];
-                winningSlot.classList.add('winning-tile-slot');
-            }
-        }
-    };
+    const handTilesCount = Array.from(window.tileSlots).filter(s => s.dataset.tile).length;
+    const meldedTilesCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
+    const totalTiles = handTilesCount + meldedTilesCount;
 
-    window.refillAndSort = function() {
-        const tiles = [];
-        window.tileSlots.forEach(slot => {
-            if (slot.dataset.tile) {
-                tiles.push({
-                    code: slot.dataset.tile,
-                    src: slot.style.backgroundImage
-                });
-            }
-        });
+    if (totalTiles === 14 && lastSelectedSlot) {
+        lastSelectedSlot.classList.add('winning-tile-slot');
+    }
+};
 
-        const suitOrder = { m: 1, p: 2, s: 3, z: 4 };
-        function normalize(tileCode) {
-            if (!tileCode) return null;
-            if (/^[1-9]'?[mps]$/.test(tileCode)) {
-                const isRed = tileCode.includes("'");
-                const num = parseInt(tileCode[0]);
-                const suit = tileCode.slice(-1);
-                return { suit, num, isRed };
-            } else if (/^z[1-7]$/.test(tileCode)) {
-                const num = parseInt(tileCode.slice(1));
-                return { suit: 'z', num, isRed: false };
-            }
-            return { suit: 'z', num: 99, isRed: false };
-        }
 
-        tiles.sort((a, b) => {
-            const A = normalize(a.code);
-            const B = normalize(b.code);
-            if (A.suit !== B.suit) return suitOrder[A.suit] - suitOrder[B.suit];
-            if (A.num !== B.num) return A.num - B.num;
-            return A.isRed - B.isRed;
-        });
+    window.refillAndSort = function () {
+    const tiles = [];
+    let winningTile = null;
 
-        window.tileSlots.forEach((slot, i) => {
-            if (i < tiles.length) {
-                slot.dataset.tile = tiles[i].code;
-                slot.style.backgroundImage = tiles[i].src;
-                slot.style.cursor = 'pointer';
+    // 全tileを取得
+    window.tileSlots.forEach(slot => {
+        if (slot.dataset.tile) {
+            const tile = {
+                code: slot.dataset.tile,
+                src: slot.style.backgroundImage,
+                slot: slot
+            };
+            // 上がり牌は1枚だけ右端にしたい
+            if (tile.code === lastSelectedTileCode && !winningTile) {
+                winningTile = tile;
             } else {
-                delete slot.dataset.tile;
-                slot.style.backgroundImage = '';
-                slot.style.cursor = 'default';
+                tiles.push(tile);
             }
-        });
-        window.updateWinningTileHighlight();
-    };
+        }
+    });
+
+    const suitOrder = { m: 1, p: 2, s: 3, z: 4 };
+    function normalize(tileCode) {
+        if (!tileCode) return null;
+        if (/^[1-9]'?[mps]$/.test(tileCode)) {
+            const isRed = tileCode.includes("'");
+            const num = parseInt(tileCode[0]);
+            const suit = tileCode.slice(-1);
+            return { suit, num, isRed };
+        } else if (/^z[1-7]$/.test(tileCode)) {
+            const num = parseInt(tileCode.slice(1));
+            return { suit: 'z', num, isRed: false };
+        }
+        return { suit: 'z', num: 99, isRed: false };
+    }
+
+    // 残り13枚をソート
+    tiles.sort((a, b) => {
+        const A = normalize(a.code);
+        const B = normalize(b.code);
+        if (A.suit !== B.suit) return suitOrder[A.suit] - suitOrder[B.suit];
+        if (A.num !== B.num) return A.num - B.num;
+        return A.isRed - B.isRed;
+    });
+
+    // 最後に選んだ牌（上がり牌）を右端に追加
+    if (winningTile) {
+        tiles.push(winningTile);
+    }
+
+    // UIに反映
+    window.tileSlots.forEach((slot, i) => {
+        if (i < tiles.length) {
+            slot.dataset.tile = tiles[i].code;
+            slot.style.backgroundImage = tiles[i].src;
+            slot.style.cursor = 'pointer';
+        } else {
+            delete slot.dataset.tile;
+            slot.style.backgroundImage = '';
+            slot.style.cursor = 'default';
+        }
+    });
+
+    // ハイライト（エフェクト）更新
+    window.updateWinningTileHighlight();
+};
+
 
     // --- DOM取得とCSRFトークン ---
     const tileImages = document.querySelectorAll('.tile-img');
@@ -222,6 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activeDoraSlot = null;
         }
         if (slot === activeHandSlot) {
+            if (slot === lastSelectedSlot) {
+                lastSelectedSlot = null;
+                lastSelectedTileCode = null;
+            }
             slot.style.backgroundImage = '';
             delete slot.dataset.tile;
             slot.classList.remove('selecting');
@@ -309,6 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (emptySlot) {
                 emptySlot.style.backgroundImage = `url(${tileSrc})`;
                 emptySlot.dataset.tile = tileCode;
+                lastSelectedTileCode = tileCode;
+                lastSelectedSlot = emptySlot;
                 window.refillAndSort();
                 updateEmptyHandHighlight();
             } else {
