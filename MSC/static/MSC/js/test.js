@@ -101,6 +101,19 @@ document.addEventListener('DOMContentLoaded', () => {
             activeHandSlot.classList.remove('selecting');
             activeHandSlot = null;
         }
+
+        const normalizeTileCode = (code) => {
+            if (/^[1-9]'?[mps]$/.test(code)) {
+                // 赤牌含む数字牌 → 5'm → m5'
+                const isRed = code.includes("'");
+                const num = code[0];
+                const suit = code.slice(-1);
+                return (suit + num + (isRed ? "'" : ""));
+            } else if (/^z[1-7]$/.test(code)) {
+                return code; // 字牌はそのまま
+            }
+            return code;
+        };
         const handPai = [];
         window.tileSlots.forEach(slot => {
             if (slot.dataset.tile) handPai.push(slot.dataset.tile);
@@ -120,13 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const winningPai = handPai.pop();
 
         const payload = {
-            hand_pai: handPai,
-            winning_pai: winningPai,
+            hand_pai: handPai.map(normalizeTileCode),
+            winning_pai: normalizeTileCode(winningPai),
             is_tsumo: isTsumoCheckbox.checked,
             is_huuro: window.meldedSets && window.meldedSets.length > 0,
             huuro: window.meldedSets || [],
-            dora_pai: selectedDoraTiles.filter(tile => tile !== null),
+            dora_pai: selectedDoraTiles.filter(tile => tile !== null).map(normalizeTileCode),
         };
+
 
         console.log('送信するデータ:', payload);
         fetch('/api/hand-input/', {
