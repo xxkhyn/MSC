@@ -2,16 +2,20 @@ from MSC.logic.parser.parse_def import TILE_TO_NUMERIC
 TILE_TO_INDEX = TILE_TO_NUMERIC
 from MSC.models import Condition
 from MSC.logic.yaku.yaku import is_chiitoitsu
+from MSC.logic.object.han import YakuCounter
+from MSC.logic.parser.parse_def import tile_strs_to_indices
 import math
 
-def calculate_fu(hand_instance, condition_instance, agari_pattern,is_chiitoitsu) -> int:
+yakuis_chiitoitsu = is_chiitoitsu
+def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiitoitsu) -> int:
     mentsu_list, head = _normalize_mentsu_list(agari_pattern[0]), agari_pattern[1]
     winning_tile = TILE_TO_INDEX[hand_instance.winning_pai]
 
-    # 七対子
-    if is_chiitoitsu:
+    # 七対子チェック（正しく counts34 相当のリストを作成）
+    tile_indices = tile_strs_to_indices(hand_instance)
+    counts = [tile_indices.count(i) for i in range(34)]
+    if yakuis_chiitoitsu(counts, YakuCounter()):
         return 25
-
 
     # 初期符（門前ロンのみ30符、それ以外は20符）
     if not hand_instance.is_tsumo and not hand_instance.is_huuro:

@@ -113,10 +113,8 @@ def judge_condition_yaku(parsed_hand, yaku_counter, condition: Condition):
     
     # リーチ関連
     if condition.is_double_riichi:
-        if "リーチ" in yaku_counter.get_yakus():
-            yaku_counter.remove_yaku("リーチ")
         yaku_counter.add_yaku("ダブルリーチ", 2)
-    elif condition.is_riichi:
+    if condition.is_riichi:
         yaku_counter.add_yaku("リーチ", 1)
     
     if condition.is_ippatsu:

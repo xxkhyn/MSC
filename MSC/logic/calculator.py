@@ -14,27 +14,36 @@ def calculate_score(hand, condition):
     result=full_flow.run_full_flow(hand.hand_pai,hand.winning_pai,hand.huuro ,condition)
     yakumann = Yakumann()
     yakumann_obj = yakumann.get_count()
-   
+    print(yakumann.get_count)
     # ① Handオブジェクトを解析役判定＋役判定＋妥当性チェックする
     # ② 符数・翻数・点数計算
     han = result['han']
 
     agari_patterns = result.get('agari_patterns')
     agari_pattern = agari_patterns[0]
-    fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu) 
+    #メンツ構成
+    print(agari_pattern[0])
+    #雀頭
+    print(agari_pattern[1])
 
+    fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu) 
+    #符表示
+    print(fu)
+    #役リスト表示
+    print(result['yaku_list'])
     if condition.player_type == 'parent':
         is_oya = True
     else:
         is_oya = False
-
+    print(yakumann_obj)
     if yakumann_obj == 0:
         sum_score = ScoreCalculator.calc_point(han, fu, condition.is_tsumo, is_oya, condition)
     else:
         sum_score = ScoreCalculator.calc_point_from_yakumann(yakumann_obj, condition.is_tsumo, is_oya)
-    
+    print(sum_score)
     # ④ 結果をScoreResult形式にまとめて返す
-    
+    print(han,fu,)
+
     return ScoreResult(
         han=han,
         fu = fu,
@@ -43,5 +52,5 @@ def calculate_score(hand, condition):
         error_message=result["error_message"]
         
     )
-
+   
    
