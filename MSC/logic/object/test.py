@@ -11,8 +11,8 @@ from types import SimpleNamespace
 
 
 def test_run_full_flow():
-    hand_pai = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'z1', 'z1', 'z1', 'z2']
-    winning_pai = 'z2'
+    hand_pai = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9','m1','m2','m3','m1']
+    winning_pai = 'm4'
     huuro = []
     dora_pai = ['m5']
 

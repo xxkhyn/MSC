@@ -284,21 +284,47 @@ def is_tanyao(parsed_hand: dict, yaku_counter, huuro=None):
     yaku_counter.add_yaku("断么九", 1)
     return True
 
-def is_pinfu(parsed_hand: dict, yaku_counter, huuro=None):
-    if huuro: return False
-    if parsed_hand.get("pair") is None:
+def get_machi_type(mentsu_list, head, winning_tile):
+    # 単騎待ち
+    if head[0] == winning_tile:
+        return "tanki"
+
+    for m in mentsu_list:
+        tiles = m["tiles"]
+        if winning_tile in tiles and len(tiles) == 3 and tiles[0] != tiles[1]:
+
+            sorted_m = sorted(tiles)
+            if sorted_m[1] == winning_tile:
+                return "kanchan"
+            elif sorted_m[0] == winning_tile and sorted_m[0] % 9 == 6:
+                return "penchan"
+            elif sorted_m[2] == winning_tile and sorted_m[2] % 9 == 2:
+                return "penchan"
+            else:
+                return "ryanmen"
+
+    return None # 刻子に当たった場合のシャンポンとみなす
+
+
+def is_pinfu(parsed_hand, yaku_counter, huuro=None):
+    mentsu_list = parsed_hand["mentsu"]
+    head = parsed_hand["pair"]["tiles"]
+    winning_tile = parsed_hand["winning_tile_index"]
+    is_huuro_flag = len(huuro) > 0
+
+    if is_huuro_flag:
         return False
-    pair_idx = parsed_hand["pair"]["tiles"][0]
-    pair_tile = NUMERIC_TO_TILE[pair_idx]
-    if pair_tile.startswith("z"):
+    if head[0] >= TILE_TO_INDEX["z1"]:  # 字牌の雀頭は役牌の可能性
         return False
-    for m in parsed_hand.get("mentsu", []):
-        if m["type"] != "shuntsu":
-            return False
-    if parsed_hand.get("wait") != "ryanmen":
-        return False
-    yaku_counter.add_yaku("平和", 1)
+    for m in mentsu_list:
+        tiles = m["tiles"]
+        if len(tiles) == 3 and len(set(tiles)) == 1:
+            return False  # 刻子があるとピンフではない
+    # TODO: 待ち形チェックを適用するなら
+    # machi_type = get_machi_type(mentsu_list, head, winning_tile)
+    yaku_counter.add_yaku("ピンフ", 1)
     return True
+
 
 def is_iipeikou(parsed_hand: dict, yaku_counter, huuro=None):
     if huuro: return False

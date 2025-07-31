@@ -1,5 +1,6 @@
 from MSC.logic.object.han import YakuCounter, Yakumann, resolve_conflicts
 from MSC.models import Condition
+from MSC.logic import parser
 
 TILE_TO_INDEX = {
     **{f"m{i}": i-1 for i in range(1, 10)},
@@ -26,6 +27,10 @@ def judge_yaku(parsed_hand, huuro=None,condition=None):
     # カウンター先に作る
     yakumann = Yakumann()
     yaku_counter = YakuCounter()
+
+
+   
+    
 
     # 和了形が成立していない場合は空の dict を返す
     if not parsed_hand.get("mentsu") or not parsed_hand.get("pair"):
@@ -113,10 +118,8 @@ def judge_condition_yaku(parsed_hand, yaku_counter, condition: Condition):
     
     # リーチ関連
     if condition.is_double_riichi:
-        yaku_counter.add_yaku("ダブルリーチ", 2)
-    if condition.is_riichi:
-        yaku_counter.add_yaku("リーチ", 1)
-    
+       yaku_counter.remove_yaku("リーチ",1)
+        
     if condition.is_ippatsu:
         yaku_counter.add_yaku("一発", 1)
     if condition.is_rinshan:

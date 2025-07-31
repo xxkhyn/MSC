@@ -3,10 +3,8 @@ from types import SimpleNamespace
 from MSC.logic.parser import parser, parse_def
 from MSC.logic.yaku.judge_yaku import judge_yaku
 from MSC.logic.yaku.yaku import calculate_waits
-from MSC.models import Condition,Hand
-from typing import Any
+from MSC.models import Condition
 from MSC.logic.object.dora import count_dora
-
 
 def classify_mentsu(m):
     if len(m) == 3:
@@ -16,18 +14,15 @@ def classify_mentsu(m):
             return "kotsu"
     return "unknown"
 
-
-def run_full_flow(hand_pai, winning_pai, huuro=None, condition: Condition = None):
+def run_full_flow(hand_pai, winning_pai, huuro=None, dora=None, condition: Condition = None):
     huuro = huuro or []
 
-    # hand_obj を作る
     hand_obj = SimpleNamespace(
         hand_pai=hand_pai,
         winning_pai=winning_pai,
         huuro=huuro,
     )
 
-    # 解析 + 赤ドラ処理
     result = parser.analyze_hand_model(hand_obj)
 
     hand_numeric = parse_def.all_tiles_to_indices(hand_obj)
@@ -48,6 +43,7 @@ def run_full_flow(hand_pai, winning_pai, huuro=None, condition: Condition = None
     else:
         mentsu = []
         pair = []
+
     def flatten(lst):
         for item in lst:
             if isinstance(item, list):
@@ -55,15 +51,10 @@ def run_full_flow(hand_pai, winning_pai, huuro=None, condition: Condition = None
             else:
                 yield item
 
-# 例
-        
-
     parsed_hand = {
         "hand_numeric": hand_numeric,
         "agari_patterns": result["agari_patterns"],
         "mentsu": [{"type": classify_mentsu(m), "tiles": list(flatten(m))} for m in mentsu],
-
-
         "pair": {"tiles": pair},
         "melds": [],
         "huuro": huuro,
@@ -72,17 +63,15 @@ def run_full_flow(hand_pai, winning_pai, huuro=None, condition: Condition = None
         "wait": calculate_waits(result)
     }
 
-    # 役判定
     yaku_result = judge_yaku(parsed_hand, huuro, condition)
     total_han = sum(yaku_result.values())
 
-    # 通常ドラ
-    if hasattr(hand_obj, "dora_pai"):
-        dora_count = count_dora(hand_pai, winning_pai, hand_obj.dora_pai)
+    if dora:
+        dora_count = count_dora(hand_pai, winning_pai, dora)
         total_han += dora_count
         if dora_count > 0:
             yaku_result["ドラ"] = dora_count
-    # 赤ドラ
+
     aka_dora_count = result.get("aka_dora_count", 0)
     if aka_dora_count > 0:
         yaku_result["赤ドラ"] = aka_dora_count
