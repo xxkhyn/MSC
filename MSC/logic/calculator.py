@@ -32,15 +32,23 @@ def calculate_score(hand, condition):
     yakumann_count = yakumann_obj.get_count()
     print("役満数:", yakumann_count)
     #メンツ構成
+    print()
     print(agari_pattern[0])
+
     #雀頭
+    print()
     print(agari_pattern[1])
 
     fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu) 
+
     #符表示
+    print()
     print(fu)
+
     #役リスト表示
+    print()
     print(result['yaku_list'])
+
     if condition.player_type == 'parent':
         is_oya = True
     else:
@@ -50,8 +58,8 @@ def calculate_score(hand, condition):
     else:
         sum_score = ScoreCalculator.calc_point_from_yakumann(yakumann_count, condition.is_tsumo, is_oya)
     print(sum_score)
+
     # ④ 結果をScoreResult形式にまとめて返す
-    print(han,fu,)
 
     return ScoreResult(
         han=han,
