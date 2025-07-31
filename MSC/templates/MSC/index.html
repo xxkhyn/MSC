@@ -11,8 +11,10 @@
   <div class="header">
     <div class="header-center">麻雀得点計算機</div>
     <div class="header-buttons">
-      <button onclick="showHelp()" class="help-button">使い方</button>
-      <button onclick="window.location.href='/score_table/'" class="help-button">得点早見表</button>
+
+      <a href="{% url 'MSC:how_to_use' %}"><button onclick="showHelp()" class="help-button">使い方</button></a>
+      <a href="{% url 'MSC:scocal_map' %}"></a><button onclick="window.location.href='/score_table/'" class="help-button">得点早見表</button></a>
+
     </div>
   </div>
 

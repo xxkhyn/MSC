@@ -161,3 +161,9 @@ def score_result_api_view(request, result_id):
         "error_message": result.error_message or "",
     }
     return JsonResponse(data)
+
+def how_to_use_view(request):
+    return render(request, 'MSC/tukaikata.html')
+
+def scocal_map_view(request):
+    return render(request, 'MSC/hayami.html')

@@ -10,4 +10,7 @@ urlpatterns = [
     path('api/condition/submit/', views.condition_submit_api, name='condition_submit_api'),
     path('api/score/calculate/', views.calculate_score_api, name='calculate_score_api'),
     path('api/score/result/<int:result_id>/', views.score_result_api_view, name='score_result_api_view'),
+
+    path('how_to_use/', views.how_to_use_view, name='how_to_use'),
+    path('score_calc_map/', views.scocal_map_view, name='scocal_map')
 ]
