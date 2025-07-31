@@ -23,6 +23,14 @@ def calculate_score(hand, condition):
 
     agari_patterns = result.get('agari_patterns')
     agari_pattern = agari_patterns[0]
+    YAKUMAN_LIST = {"国士無双", "四暗刻", "四暗刻単騎", "九蓮宝燈", "純正九蓮宝燈", "大三元", "四槓子", "小四喜", "大四喜"}
+    yakumann_obj = Yakumann()
+    for yaku in result.get("yaku_list", []):
+        if yaku in YAKUMAN_LIST:
+            yakumann_obj.add_yaku(yaku)
+
+    yakumann_count = yakumann_obj.get_count()
+    print("役満数:", yakumann_count)
     #メンツ構成
     print(agari_pattern[0])
     #雀頭
@@ -37,11 +45,10 @@ def calculate_score(hand, condition):
         is_oya = True
     else:
         is_oya = False
-    print(yakumann_obj)
-    if yakumann_obj == 0:
+    if yakumann_count == 0:
         sum_score = ScoreCalculator.calc_point(han, fu, condition.is_tsumo, is_oya, condition)
     else:
-        sum_score = ScoreCalculator.calc_point_from_yakumann(yakumann_obj, condition.is_tsumo, is_oya)
+        sum_score = ScoreCalculator.calc_point_from_yakumann(yakumann_count, condition.is_tsumo, is_oya)
     print(sum_score)
     # ④ 結果をScoreResult形式にまとめて返す
     print(han,fu,)
@@ -52,7 +59,6 @@ def calculate_score(hand, condition):
         point = sum_score['score'],
         yaku_list=result['yaku_list'],
         error_message=result["error_message"]
-        
     )
    
    

@@ -15,8 +15,7 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         return math.ceil(value / 100) * 100
 
     @staticmethod
-    def calc_point_from_yakumann(yakumann_obj, is_tsumo: bool, is_oya: bool):
-        yakumann_count = yakumann_obj.count()
+    def calc_point_from_yakumann(yakumann_count, is_tsumo: bool, is_oya: bool):
         base = ScoreCalculator.calculate_base_point_from_yakumann(yakumann_count)
         base = ScoreCalculator.round_up_100(base)
         result = {
@@ -25,10 +24,9 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
             "score": ""
         }
         result["hand_type"] = f"{yakumann_count}倍役満"
-        if is_tsumo:
-            result["score"] = f"{base * 2}オール" if is_oya else f"{base},{base * 2}"
-        else:
-            result["score"] = f"{base * 6}" if is_oya else f"{base * 4}"
+       
+        result["score"] = base * 6 if is_oya else base * 4
+        
 
         return result
     @staticmethod
@@ -83,38 +81,24 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         kyotaku = condition.kyotaku  
 
 # 点数詳細と出力用文字列を作成
-        if is_tsumo:
-            if is_oya:
-                score_val = ScoreCalculator.round_up_100(base * 2 + 100 * honba)
-                score_val += 1000 * kyotaku  # 供託加算
-                score_detail = {
-                    "oya_all": score_val
-                }
-                score_text = f"{score_val}オール"
-            else:
-                ko_score = ScoreCalculator.round_up_100(base + 100 * honba)
-                oya_score = ScoreCalculator.round_up_100(base * 2 + 100 * honba)
-                total_score = ko_score * 2 + oya_score + 1000 * kyotaku
-                score_detail = {
-                    "ko": ko_score,
-                    "oya": oya_score,
-                    "kyotaku_bonus": 1000 * kyotaku
-                }
-                score_text = f"{ko_score},{oya_score}"
+        #if is_tsumo:
+        if is_oya:
+            score_val = ScoreCalculator.round_up_100(base * 6)
+            score_val += 1000 * kyotaku + 100 * honba
+
         else:
-            ron_score = ScoreCalculator.round_up_100((base * 6 if is_oya else base * 4) + 300 * honba + 1000 * kyotaku)
-            score_detail = {
-                "ron_score": ron_score,
-                "honba_bonus": 300 * honba,
-                "kyotaku_bonus": 1000 * kyotaku
-            }
-            score_text = str(ron_score)
+            ko_score = ScoreCalculator.round_up_100(base)
+            oya_score = ScoreCalculator.round_up_100(base * 2)
+            score_val = ko_score * 2 + oya_score + 1000 * kyotaku + 100 * honba
+        '''else:
+            score_val = ScoreCalculator.round_up_100(
+            (base * 6 if is_oya else base * 4) + 300 * honba + 1000 * kyotaku
+        )'''
 
 
 
         return {
             "base_point": base,#点数計算に使用し基本点、表示させる際はいらないけどテスト用に残した
             "hand_type": hand_type,#満貫、跳満など
-            "score": score_text,#合計点数　例.8000
-            "score_detail": score_detail #ツモの場合：子の支払い点数、親の支払い点数、供託の点数　例.2000,4000,1000
-        }                                #ロンの場合：支払い点数、本場点数、供託の点数
+            "score": score_val#合計点数　例.8000
+        }
