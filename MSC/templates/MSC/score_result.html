@@ -2,43 +2,48 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>得点結果</title>
-    <link rel="stylesheet" href="{% static 'MSC/css/score_result.css' %}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>得点結果</title>
+  <link rel="stylesheet" href="{% static 'MSC/css/score_result.css' %}" />
 </head>
 <body>
-    <div class="container">
-        <h1>得点結果</h1>
-        
-        
-        <div id="score-area">
-            {% if result %}
-                {% if result.error_message %}
-                    <div class="error">
-                        <p>⚠ エラー: {{ result.error_message }}</p>
-                    </div>
-                {% else %}
-                    <div class="score-block">
-                        <p><strong>翻数:</strong> {{ result.han }} 翻</p>
-                        <p><strong>符数:</strong> {{ result.fu }} 符</p>
-                        <p><strong>得点:</strong> {{ result.point }} 点</p>
-                        <p><strong>役:</strong></p>
-                        <ul class="yaku-list">
-                            {% for yaku in result.yaku_list %}
-                                <li>{{ yaku }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-            {% else %}
-                <p>まだ得点結果がありません。</p>
-            {% endif %}
-        </div>
-        <input type="hidden" id="result-id" value="{{ result.id|default_if_none:'' }}">
-        <button id="reload-button">計算開始</button>
+  <div class="container">
+    <h1 class="result-title">得点結果</h1>
+
+    <div id="score-area" class="score-point">
+      {% if result %}
+        {% if result.error_message %}
+          <div class="error">⚠ エラー: {{ result.error_message }}</div>
+        {% else %}
+          <div class="result-box">
+            <p class="result-row">翻数：{{ result.han }} 翻</p>
+            <p class="result-row">符数：{{ result.fu }} 符</p>
+            <p class="score-points">{{ result.point }}<span>点</span></p>
+
+            <table class="yaku-table">
+              <tbody>
+                {% for yaku in result.yaku_list %}
+                  <tr>
+                    {% with yaku|cut:" " as base_yaku %}
+                      <td class="yaku-name">{{ yaku|slice:":-3" }}</td>
+                      <td class="yaku-han">{{ yaku|slice:"-3:" }}</td>
+                    {% endwith %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      {% else %}
+        <p>まだ得点結果がありません。</p>
+      {% endif %}
     </div>
-    
-    <script src="{% static 'MSC/js/score_result.js' %}"></script>
+
+    <input type="hidden" id="result-id" value="{{ result.id|default_if_none:'' }}">
+    <button id="reload-button">計算開始</button>
+  </div>
+
+  <script src="{% static 'MSC/js/score_result.js' %}"></script>
 </body>
 </html>

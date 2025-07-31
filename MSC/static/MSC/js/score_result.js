@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 scoreArea.innerHTML = `
                     <div class="score-block">
-                        <p><strong>翻数:</strong> ${data.han} 翻</p>
-                        <p><strong>符数:</strong> ${data.fu} 符</p>
-                        <p><strong>得点:</strong> ${data.point} 点</p>
-                        <p><strong>役:</strong></p>
+                        <p class="result-row"><strong>翻数:</strong> ${data.han} 翻</p>
+                        <p class="result-row"><strong>符数:</strong> ${data.fu} 符</p>
+                        <p class="score-points"><strong></strong> ${data.point} 点</p>
+                        <p><strong>役</strong></p>
                         <ul class="yaku-list">${yakuHtml}</ul>
                     </div>
                 `;

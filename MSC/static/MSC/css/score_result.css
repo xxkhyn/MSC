@@ -14,36 +14,26 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
   
-  h1 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: #333;
-  }
-  
-  .score-block p {
-    font-size: 1.1rem;
-    margin: 0.5rem 0;
-  }
+  .result-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
   
   .yaku-list {
-    list-style: disc inside;
+    list-style: none; 
     margin: 1rem 0;
     padding: 0;
   }
-  
-  .yaku-list li {
-    font-size: 1rem;
-    margin: 0.3rem 0;
-  }
-  
-  .error {
-    background-color: #ffe0e0;
-    color: #b00020;
-    padding: 1rem;
-    border-radius: 8px;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-    text-align: center;
+
+  .score-point {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 1.5rem 0 2rem;
+}
+  .score-points {
+      font-size: 2rem;
+      margin: 0.3rem 0;
   }
   
   #back-button {
@@ -61,4 +51,26 @@ body {
   #back-button:hover {
     background-color: #0056b3;
   }
-  
+  #reload-button {
+  margin-top: 2rem;
+  padding: 0.8rem 2.5rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  background-color: white;
+  color: #111;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#reload-button:hover {
+  background-color: #eee;
+}
+
+.error {
+  background-color: #ffe0e0;
+  color: #b00020;
+  padding: 1rem;
+  border-radius: 6px;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
