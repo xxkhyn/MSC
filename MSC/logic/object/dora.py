@@ -1,3 +1,4 @@
+
 def next_dora_tile(tile_str: str) -> str:
     """
     表示牌からドラを返す。
@@ -20,10 +21,14 @@ def next_dora_tile(tile_str: str) -> str:
         raise ValueError(f"Unknown tile: {tile_str}")
 
 
+def normalize_tile(tile_str: str) -> str:
+    """牌文字列から赤ドラマーク（'）を外す"""
+    return tile_str[:-1] if tile_str.endswith("'") else tile_str
+
 def count_dora(hand_pai: list, winning_pai: str, dora_list: list) -> int:
-    """
-    手牌と和了牌に含まれるドラの数をカウントする
-    """
     dora_tiles = [next_dora_tile(d) for d in dora_list]
-    all_tiles = hand_pai + [winning_pai]
-    return sum(all_tiles.count(d) for d in dora_tiles)
+    
+    # 赤ドラマークを外して正規化
+    normalized_hand = [normalize_tile(t) for t in hand_pai + [winning_pai]]
+
+    return sum(normalized_hand.count(d) for d in dora_tiles)

@@ -14,18 +14,18 @@ from MSC import models  # Hand モデルを想定
 
 # 数値 <-> 牌文字 の変換テーブル
 NUMERIC_TO_TILE = {
-    **{i: f"m{i+1}" for i in range(0, 9)},    # 0-8
-    **{i: f"p{i-8}" for i in range(9, 18)},   # 9-17
-    **{i: f"s{i-17}" for i in range(18, 27)}, # 18-26
-    **{i: f"z{i-26}" for i in range(27, 34)}, # 27-33
+    **{i: f"m{i+1}" for i in range(0, 9)},
+    **{i+9: f"p{i+1}" for i in range(0, 9)},
+    **{i+18: f"s{i+1}" for i in range(0, 9)},
+    **{i+27: f"z{i+1}" for i in range(0, 7)},
+    34: "m5'",  # 赤ドラ 5萬
+    35: "p5'",  # 赤ドラ 5筒（もし使うなら）
+    36: "s5'",  # 赤ドラ 5索（もし使うなら）
 }
 TILE_TO_NUMERIC = {v: k for k, v in NUMERIC_TO_TILE.items()}
 
 
 def tile_strs_to_indices(hand_obj):
-    """
-    Handオブジェクトの hand_pai だけを数値化する
-    """
     hand_pai = hand_obj.hand_pai
     indices = []
     for t in hand_pai:
