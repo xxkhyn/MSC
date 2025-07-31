@@ -63,7 +63,7 @@ def can_form_agari_numeric(hand_obj):
                 del temp[i]
             mentsu_list = []
             if _can_form_mentsu_numeric(temp, mentsu_list):
-                results.append((copy.deepcopy(mentsu_list), [i, i]))
+                results.append([copy.deepcopy(mentsu_list), [i, i]])
     return results
 
 

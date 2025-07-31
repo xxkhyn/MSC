@@ -87,9 +87,22 @@ from collections import Counter
 def is_chuuren(parsed_hand: dict, yakumann):
 
     tiles_flat = []
-    for m in parsed_hand.get("mentsu", []) + [parsed_hand.get("pair")]:
-        if m:
-            tiles_flat.extend(m["tiles"])
+    for m in parsed_hand.get("mentsu", []):
+        tiles = m.get("tiles", [])
+    # もし tiles がリストのリストなら展開する
+        for t in tiles:
+            if isinstance(t, list):
+                tiles_flat.extend(t)
+            else:
+                tiles_flat.append(t)
+
+    pair_tiles = parsed_hand.get("pair", {}).get("tiles", [])
+    for t in pair_tiles:
+        if isinstance(t, list):
+            tiles_flat.extend(t)
+        else:
+            tiles_flat.append(t)
+
 
     suits = set(idx // 9 for idx in tiles_flat)
     if len(suits) != 1:

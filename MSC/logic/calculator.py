@@ -34,12 +34,14 @@ def calculate_score(hand, condition):
         sum_score = ScoreCalculator.calc_point_from_yakumann(yakumann_obj, condition.is_tsumo, is_oya)
     
     # ④ 結果をScoreResult形式にまとめて返す
+    
     return ScoreResult(
         han=han,
         fu = fu,
         point = sum_score['score'],
         yaku_list=result['yaku_list'],
         error_message=result["error_message"]
+        
     )
 
    

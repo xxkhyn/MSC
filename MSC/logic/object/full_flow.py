@@ -3,8 +3,11 @@ from types import SimpleNamespace
 from MSC.logic.parser import parser, parse_def
 from MSC.logic.yaku.judge_yaku import judge_yaku
 from MSC.logic.yaku.yaku import calculate_waits
-from MSC.models import Condition
-from typing import Literal, Any
+from MSC.models import Condition,Hand
+from typing import Any
+from MSC.logic.object.dora import count_dora
+
+
 def classify_mentsu(m):
     if len(m) == 3:
         if m[0] + 1 == m[1] and m[1] + 1 == m[2]:
@@ -14,66 +17,81 @@ def classify_mentsu(m):
     return "unknown"
 
 
-
-def run_full_flow(hand_pai, winning_pai, huuro=None,condition=None):
+def run_full_flow(hand_pai, winning_pai, huuro=None, condition: Condition = None):
     huuro = huuro or []
 
-    # 先に hand_obj を作る（hand_numeric はまだ無いので入れない）
+    # hand_obj を作る
     hand_obj = SimpleNamespace(
         hand_pai=hand_pai,
         winning_pai=winning_pai,
         huuro=huuro,
     )
 
-    # hand_numeric を作成
-    hand_numeric = parse_def.all_tiles_to_indices(hand_obj)
-
-    # hand_numeric を hand_obj に追加（必要なら）
-    hand_obj.hand_numeric = hand_numeric
-
-    # tiles_count 作成
-    tiles_count = [0] * 34
-    count = Counter(hand_pai + [winning_pai])
-    for tile_str, c in count.items():
-        idx = parse_def.TILE_TO_NUMERIC[tile_str]  # 牌文字列→数値インデックス
-        tiles_count[idx] = c
-
-    # winning_tile_index
-    winning_tile_index = parse_def.TILE_TO_NUMERIC[winning_pai]
-
-    # analyze_hand_model は hand_obj 一つだけ引数
+    # 解析 + 赤ドラ処理
     result = parser.analyze_hand_model(hand_obj)
 
-    first_pattern = result["agari_patterns"][0][0]  # 面子だけ
-    pair = result["agari_patterns"][0][1]  # 雀頭
+    hand_numeric = parse_def.all_tiles_to_indices(hand_obj)
+    hand_obj.hand_numeric = hand_numeric
 
+    tiles_count = [0] * 34
+    count = Counter(hand_obj.hand_pai + [hand_obj.winning_pai])
+    for tile_str, c in count.items():
+        idx = parse_def.TILE_TO_NUMERIC[tile_str]
+        tiles_count[idx] = c
 
-    # parsed_hand 辞書作成
+    winning_tile_index = parse_def.TILE_TO_NUMERIC[hand_obj.winning_pai]
+
+    if result["agari_patterns"]:
+        first_pattern = result["agari_patterns"][0]
+        mentsu = first_pattern[0]
+        pair = first_pattern[1]
+    else:
+        mentsu = []
+        pair = []
+    def flatten(lst):
+        for item in lst:
+            if isinstance(item, list):
+                yield from flatten(item)
+            else:
+                yield item
+
+# 例
+        
+
     parsed_hand = {
-    "hand_numeric": hand_numeric,
-    "agari_patterns": result["agari_patterns"],
-    "mentsu": [
-        {"type": classify_mentsu(m), "tiles": m} for m in first_pattern
-    ],
-    "pair": {"tiles": pair},
-    "melds": [],
-    "huuro": huuro,
-    "tiles_count": tiles_count,
-    "winning_tile_index": winning_tile_index,
-    "wait": calculate_waits(result)
-}
+        "hand_numeric": hand_numeric,
+        "agari_patterns": result["agari_patterns"],
+        "mentsu": [{"type": classify_mentsu(m), "tiles": list(flatten(m))} for m in mentsu],
 
+
+        "pair": {"tiles": pair},
+        "melds": [],
+        "huuro": huuro,
+        "tiles_count": tiles_count,
+        "winning_tile_index": winning_tile_index,
+        "wait": calculate_waits(result)
+    }
 
     # 役判定
-    yaku_result= judge_yaku(parsed_hand, huuro, condition)
+    yaku_result = judge_yaku(parsed_hand, huuro, condition)
     total_han = sum(yaku_result.values())
 
-# 結果返却
+    # 通常ドラ
+    if hasattr(hand_obj, "dora_pai"):
+        dora_count = count_dora(hand_pai, winning_pai, hand_obj.dora_pai)
+        total_han += dora_count
+        if dora_count > 0:
+            yaku_result["ドラ"] = dora_count
+    # 赤ドラ
+    aka_dora_count = result.get("aka_dora_count", 0)
+    if aka_dora_count > 0:
+        yaku_result["赤ドラ"] = aka_dora_count
+        total_han += aka_dora_count
+
     return {
-    "han": total_han,
-    "yaku_list": yaku_result,
-    "agari_patterns": result["agari_patterns"],
-    "melds": result["melds"],
-    "melds_descriptions": result["melds_descriptions"],
-    "error_message": result["error_message"],
-}
+        "han": total_han,
+        "yaku_list": yaku_result,
+        "agari_patterns": result["agari_patterns"],
+        "melds_descriptions": result["melds_descriptions"],
+        "error_message": result["error_message"],
+    }

@@ -50,6 +50,7 @@ def test_calculate_score():
     print(f"Point (点数): {result.point}")
     print(f"Yaku List (役一覧): {result.yaku_list}")
     print(f"Error: {result.error_message}")
+    print(f"agari_patterns:{result}")
 
 if __name__ == '__main__':
     test_calculate_score()
