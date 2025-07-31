@@ -8,7 +8,10 @@
   <link rel="stylesheet" href="{% static 'MSC/css/style.css' %}">
 </head>
 <body>
-  <div class="header">麻雀得点計算機</div>
+  <div class="header">麻雀得点計算機
+  <button onclick="showHelp()" class="help-button">使い方</button>
+  <button onclick="showHelp()" class="help-button">得点早見表</button>
+  </div>
 
   <div class="section tokuten">
     {% include 'MSC/score_result.html' %}
