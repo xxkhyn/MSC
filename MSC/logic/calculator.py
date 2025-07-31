@@ -11,9 +11,11 @@ from MSC.logic.object.han import Yakumann
 
 
 def calculate_score(hand, condition):
-    result=full_flow.run_full_flow(hand.hand_pai,hand.winning_pai,hand.huuro ,condition)
+
+    result=full_flow.run_full_flow(hand,condition)
     yakumann = Yakumann()
     yakumann_obj = yakumann.get_count()
+
     print(yakumann.get_count)
     # ① Handオブジェクトを解析役判定＋役判定＋妥当性チェックする
     # ② 符数・翻数・点数計算

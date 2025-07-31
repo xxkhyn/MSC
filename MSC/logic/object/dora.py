@@ -5,19 +5,20 @@ def next_dora_tile(tile_str: str) -> str:
     - 字牌なら 東 → 南 → 西 → 北 → 白 → 発 → 中 → 東
     """
     suits = ["m", "p", "s"]
-    honors = ["1z", "2z", "3z", "4z", "5z", "6z", "7z"]  # 東南西北白発中
+    honors = ["z1", "z2", "z3", "z4", "z5", "z6", "z7"]  # 東南西北白発中
 
-    num, suit = tile_str[:-1], tile_str[-1]
+    suit, num = tile_str[0], tile_str[1:]
 
     if suit in suits:
         next_num = str(int(num) + 1) if int(num) < 9 else "1"
-        return next_num + suit
+        return f"{suit}{next_num}"
     elif suit == "z":
         index = honors.index(tile_str)
         next_index = (index + 1) % len(honors)
         return honors[next_index]
     else:
         raise ValueError(f"Unknown tile: {tile_str}")
+
 
 def count_dora(hand_pai: list, winning_pai: str, dora_list: list) -> int:
     """

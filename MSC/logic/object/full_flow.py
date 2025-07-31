@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from MSC.logic.parser import parser, parse_def
 from MSC.logic.yaku.judge_yaku import judge_yaku
 from MSC.logic.yaku.yaku import calculate_waits
-from MSC.models import Condition
+from MSC.models import Condition,Hand
 from MSC.logic.object.dora import count_dora
 
 def classify_mentsu(m):
@@ -14,15 +14,19 @@ def classify_mentsu(m):
             return "kotsu"
     return "unknown"
 
-def run_full_flow(hand_pai, winning_pai, huuro=None, dora=None, condition: Condition = None):
-    huuro = huuro or []
+def run_full_flow(hand: Hand, condition: Condition = None):
+    # hand.huuro は None かもしれないので空リストで補完
+    huuro = hand.huuro or []
 
+    # 解析用オブジェクト作成
     hand_obj = SimpleNamespace(
-        hand_pai=hand_pai,
-        winning_pai=winning_pai,
+        hand_pai=hand.hand_pai,
+        winning_pai=hand.winning_pai,
         huuro=huuro,
+        dora_pai=getattr(hand, "dora_pai", [])  # dora_pai が Hand にあれば渡す
     )
 
+    # 解析
     result = parser.analyze_hand_model(hand_obj)
 
     hand_numeric = parse_def.all_tiles_to_indices(hand_obj)
@@ -63,15 +67,18 @@ def run_full_flow(hand_pai, winning_pai, huuro=None, dora=None, condition: Condi
         "wait": calculate_waits(result)
     }
 
+    # 役判定
     yaku_result = judge_yaku(parsed_hand, huuro, condition)
     total_han = sum(yaku_result.values())
 
-    if dora:
-        dora_count = count_dora(hand_pai, winning_pai, dora)
+    # 通常ドラ
+    if getattr(hand, "dora_pai", []):
+        dora_count = count_dora(hand.hand_pai, hand.winning_pai, hand.dora_pai)
         total_han += dora_count
         if dora_count > 0:
             yaku_result["ドラ"] = dora_count
 
+    # 赤ドラ
     aka_dora_count = result.get("aka_dora_count", 0)
     if aka_dora_count > 0:
         yaku_result["赤ドラ"] = aka_dora_count

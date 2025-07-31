@@ -16,7 +16,7 @@ def test_run_full_flow():
     huuro = []
     dora_pai = ['m5']
 
-    Hand = SimpleNamespace(
+    hand = SimpleNamespace(
         hand_pai=hand_pai,
         winning_pai=winning_pai,
         huuro=huuro,
@@ -37,7 +37,7 @@ def test_run_full_flow():
         is_tsumo=True,
     )
 
-    result = run_full_flow(hand_pai, winning_pai, huuro, condition=cond)
+    result = run_full_flow(hand, condition=cond)
 
     print("=== Full Flow Result ===")
     print("Han:", result["han"])
