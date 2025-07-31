@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from MSC.logic.parser import parser, parse_def
 from MSC.logic.yaku.judge_yaku import judge_yaku
 from MSC.logic.yaku.yaku import calculate_waits
-from MSC.models import Condition,Hand
+from MSC.models import Condition, Hand
 from MSC.logic.object.dora import count_dora
 
 def classify_mentsu(m):
@@ -12,23 +12,21 @@ def classify_mentsu(m):
             return "shuntsu"
         elif m[0] == m[1] == m[2]:
             return "kotsu"
+    elif len(m) == 4:
+        return "kantsu"
     return "unknown"
 
 def run_full_flow(hand: Hand, condition: Condition = None):
-    # hand.huuro は None かもしれないので空リストで補完
     huuro = hand.huuro or []
 
-    # 解析用オブジェクト作成
     hand_obj = SimpleNamespace(
         hand_pai=hand.hand_pai,
         winning_pai=hand.winning_pai,
         huuro=huuro,
-        dora_pai=getattr(hand, "dora_pai", [])  # dora_pai が Hand にあれば渡す
+        dora_pai=getattr(hand, "dora_pai", [])
     )
 
-    # 解析
     result = parser.analyze_hand_model(hand_obj)
-
     hand_numeric = parse_def.all_tiles_to_indices(hand_obj)
     hand_obj.hand_numeric = hand_numeric
 
@@ -40,13 +38,36 @@ def run_full_flow(hand: Hand, condition: Condition = None):
 
     winning_tile_index = parse_def.TILE_TO_NUMERIC[hand_obj.winning_pai]
 
+    # -------------------------------
+    # 例外手役を判定する
+    # -------------------------------
+    is_chiitoitsu = False
+    is_kokushi = False
+    mentsu, pair = [], []
+
     if result["agari_patterns"]:
         first_pattern = result["agari_patterns"][0]
-        mentsu = first_pattern[0]
-        pair = first_pattern[1]
+        if len(first_pattern) == 2:
+            if first_pattern[1] is None:
+                # 七対子: pairs only
+                is_chiitoitsu = True
+                pair = first_pattern[0]
+            else:
+                # 通常の面子手
+                mentsu = first_pattern[0]
+                pair = first_pattern[1]
+        elif "kokushi" in result:
+            # 国士無双の特別フラグを analyzer が出す前提
+            is_kokushi = True
     else:
-        mentsu = []
-        pair = []
+        # 和了形が作れない場合
+        return {
+            "han": 0,
+            "yaku_list": {},
+            "agari_patterns": [],
+            "melds_descriptions": [],
+            "error_message": result["error_message"],
+        }
 
     def flatten(lst):
         for item in lst:
@@ -58,27 +79,26 @@ def run_full_flow(hand: Hand, condition: Condition = None):
     parsed_hand = {
         "hand_numeric": hand_numeric,
         "agari_patterns": result["agari_patterns"],
-        "mentsu": [{"type": classify_mentsu(m), "tiles": list(flatten(m))} for m in mentsu],
-        "pair": {"tiles": pair},
+        "mentsu": [{"type": classify_mentsu(m), "tiles": list(flatten(m))} for m in mentsu] if mentsu else [],
+        "pair": {"tiles": pair} if pair else {},
         "melds": [],
         "huuro": huuro,
         "tiles_count": tiles_count,
         "winning_tile_index": winning_tile_index,
-        "wait": calculate_waits(result)
+        "wait": calculate_waits(result),
+        "is_chiitoitsu": is_chiitoitsu,
+        "is_kokushi": is_kokushi,
     }
 
-    # 役判定
     yaku_result = judge_yaku(parsed_hand, huuro, condition)
     total_han = sum(yaku_result.values())
 
-    # 通常ドラ
     if getattr(hand, "dora_pai", []):
         dora_count = count_dora(hand.hand_pai, hand.winning_pai, hand.dora_pai)
         total_han += dora_count
         if dora_count > 0:
             yaku_result["ドラ"] = dora_count
 
-    # 赤ドラ
     aka_dora_count = result.get("aka_dora_count", 0)
     if aka_dora_count > 0:
         yaku_result["赤ドラ"] = aka_dora_count
