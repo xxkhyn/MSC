@@ -1,16 +1,17 @@
-*.pyc
+# Python バイトコードとキャッシュ
 __pycache__/
+*.py[cod]
+
+# 仮想環境
 venv/
-*.pyc
-__pycache__/
-venv/
-*.pyc
-__pycache__/
-venv/
+.env/
+.venv/
+
+# SQLite データベース（開発用なら除外推奨）
 *.sqlite3
-*.pyc
-__pycache__/
-*.pyc
-__pycache__/
-__pycache__/
-__pycache__/
+
+# VSCode設定（必要なら）
+.vscode/
+
+# その他不要ファイル
+*.log
