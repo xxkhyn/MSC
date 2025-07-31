@@ -73,7 +73,7 @@ def calculate_score(hand, condition):
         han=han,
         fu = fu,
         point = sum_score['score'],
-        yaku_list=result['yaku_list'],
+        yaku_list=result_yaku_list,
         error_message=result["error_message"]
     )
    

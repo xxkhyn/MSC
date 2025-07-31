@@ -45,9 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 scoreArea.innerHTML = `<div class="error"><p>⚠ エラー: ${data.error_message}</p></div>`;
             } else {
                 let yakuHtml = '';
-                data.yaku_list.forEach(yaku => {
-                    yakuHtml += `<li>${yaku}</li>`;
+                data.yaku_list.forEach(([name, value]) => {
+                    yakuHtml += `<li>${name}　${value}翻</li>`;  // ← 全角スペース + 翻数
                 });
+
 
                 scoreArea.innerHTML = `
                     <div class="score-block">
