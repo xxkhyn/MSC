@@ -122,7 +122,6 @@ def get_machi_type(mentsu_list, head, winning_tile):
 
     return None # 刻子に当たった場合のシャンポンとみなす
 
-
 def _is_pinfu(mentsu_list, head, winning_tile, is_huuro, is_tsumo):
     if is_huuro:
         return False

@@ -14,16 +14,46 @@ document.addEventListener('DOMContentLoaded', () => {
     window.tileSlots = document.querySelectorAll('#hand > .tile-slot');
 
     window.updateWinningTileHighlight = function () {
-    window.tileSlots.forEach(slot => slot.classList.remove('winning-tile-slot'));
+        window.tileSlots.forEach(slot => slot.classList.remove('winning-tile-slot'));
 
-    const handTilesCount = Array.from(window.tileSlots).filter(s => s.dataset.tile).length;
-    const meldedTilesCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
-    const totalTiles = handTilesCount + meldedTilesCount;
+        const meldedCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
+        const totalTiles = Array.from(window.tileSlots).filter(s => s.dataset.tile).length + meldedCount;
 
-    if (totalTiles === 14 && lastSelectedSlot) {
-        lastSelectedSlot.classList.add('winning-tile-slot');
-    }
-};
+        if (totalTiles !== 14 || !lastSelectedTileCode) return;
+
+            // スロットインデックスでの和了牌位置を決定（0-based）
+            const highlightIndex = 14 - Math.floor(meldedCount / 3) - 1;
+
+            const slot = window.tileSlots[highlightIndex];
+
+        // tileCodeの一致だけでなく、スロット自体が lastSelectedSlot かどうかも見る
+        if (slot && slot.dataset.tile === lastSelectedTileCode) {
+                slot.classList.add('winning-tile-slot');
+        } else if (lastSelectedSlot && lastSelectedSlot.dataset.tile === lastSelectedTileCode) {
+            lastSelectedSlot.classList.add('winning-tile-slot');
+        }
+    };
+
+
+    // 和了方法ボタン（ツモ / ロン）の選択処理
+    const agariTypeButtons = document.querySelectorAll('.agari-type-btn');
+    window.isTsumoSelected = true; // 初期値はツモ
+
+    agariTypeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // すべてのボタンから選択クラスを除去
+            agariTypeButtons.forEach(btn => btn.classList.remove('selected'));
+            // クリックされたボタンに選択クラスを付与
+            button.classList.add('selected');
+
+            // 状態をグローバル変数に記録
+            window.isTsumoSelected = button.dataset.agari === 'tsumo';
+        });
+    });
+
+
+
+
 
 
     window.refillAndSort = function () {
@@ -33,20 +63,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // 全tileを取得
     window.tileSlots.forEach(slot => {
         if (slot.dataset.tile) {
-            const tile = {
+            tiles.push({
                 code: slot.dataset.tile,
                 src: slot.style.backgroundImage,
                 slot: slot
-            };
-            // 上がり牌は1枚だけ右端にしたい
-            if (tile.code === lastSelectedTileCode && !winningTile) {
-                winningTile = tile;
-            } else {
-                tiles.push(tile);
-            }
+            });
         }
     });
 
+    const meldedCount = (window.meldedSets || []).reduce((acc, set) => acc + set.tiles.length, 0);
+    const totalTiles = tiles.length + meldedCount;
+
+    // 和了牌を右端に除外する条件：牌が14枚あるときだけ
+    if (totalTiles === 14 && lastSelectedTileCode) {
+        const index = tiles.findIndex(tile => tile.code === lastSelectedTileCode);
+        if (index !== -1) {
+            winningTile = tiles.splice(index, 1)[0]; // ソート対象から除外
+        }
+    }
+
+    // ソート処理（数字・種類・赤ドラ）
     const suitOrder = { m: 1, p: 2, s: 3, z: 4 };
     function normalize(tileCode) {
         if (!tileCode) return null;
@@ -62,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { suit: 'z', num: 99, isRed: false };
     }
 
-    // 残り13枚をソート
     tiles.sort((a, b) => {
         const A = normalize(a.code);
         const B = normalize(b.code);
@@ -71,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return A.isRed - B.isRed;
     });
 
-    // 最後に選んだ牌（上がり牌）を右端に追加
+    // 和了牌があるなら右端に追加
     if (winningTile) {
         tiles.push(winningTile);
     }
@@ -89,9 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ハイライト（エフェクト）更新
     window.updateWinningTileHighlight();
 };
+
 
 
     // --- DOM取得とCSRFトークン ---
@@ -99,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetButton = document.getElementById('reset-button');
     const submitButton = document.getElementById('submit-hand');
     const doraSlots = document.querySelectorAll('.dora-slot');
-    const isTsumoCheckbox = document.getElementById('is-tsumo-checkbox');
 
     function getCookie(name) {
         let cookieValue = null;
@@ -157,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             hand_pai: handPai.map(normalizeTileCode),
             winning_pai: normalizeTileCode(winningPai),
-            is_tsumo: isTsumoCheckbox.checked,
+            is_tsumo: window.isTsumoSelected,
             is_huuro: window.meldedSets && window.meldedSets.length > 0,
             huuro: window.meldedSets || [],
             dora_pai: selectedDoraTiles.filter(tile => tile !== null).map(normalizeTileCode),
@@ -335,13 +369,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (emptySlot) {
                 emptySlot.style.backgroundImage = `url(${tileSrc})`;
                 emptySlot.dataset.tile = tileCode;
+
+                // 和了牌情報を更新（←ソートの前に行うのが重要）
                 lastSelectedTileCode = tileCode;
                 lastSelectedSlot = emptySlot;
+            }
+
+            // 牌が入らなくても和了牌情報を更新したならソート・ハイライトを即時実行
+            setTimeout(() => {
                 window.refillAndSort();
                 updateEmptyHandHighlight();
-            } else {
+            }, 0);
+
+            if (!emptySlot) {
                 alert('手牌が一杯です。');
-            }
+                }   
         });
     });
 

@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.meldedSets.splice(meldIndex, 1);
         }
         meldGroupElement.remove();
-        addSlotsToHand(meldData.tiles.length === 4 ? 4 : 3); // カンの場合は4枚戻す
+        addSlotsToHand(3); // カンでもチー・ポンでも3枚だけ戻す
     }
 
     function addSlotsToHand(count) {
