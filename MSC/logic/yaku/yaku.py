@@ -210,12 +210,16 @@ def is_ryanpeikou(parsed_hand: dict, yaku_counter, huuro=None):
         return True
     return False
 
-def is_chiitoitsu(tiles):
-    if len(tiles) != 14:
+def is_chiitoitsu(tiles_counts,yaku_counter):
+    if len(tiles_counts) != 14:
         return False
-    counts = Counter(tiles)
+    counts = Counter(tiles_counts)
     pairs = [c for c in counts.values() if c == 2]
-    return len(pairs) == 7
+    if len(pairs) == 7:
+        yaku_counter.add_yaku("七対子", 2)
+        return True
+    return False
+
 
 def is_ikkitsuukan(parsed_hand: dict, yaku_counter, huuro=None):
     suits = {"m":[False]*3, "p":[False]*3, "s":[False]*3}

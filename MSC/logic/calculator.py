@@ -18,6 +18,7 @@ def calculate_score(hand, condition):
     yakumann = Yakumann()
     yakumann_obj = yakumann.get_count()
 
+    
     print(yakumann.get_count)
     # ① Handオブジェクトを解析役判定＋役判定＋妥当性チェックする
     # ② 符数・翻数・点数計算
@@ -25,7 +26,7 @@ def calculate_score(hand, condition):
 
     agari_patterns = result.get('agari_patterns')
     agari_pattern = agari_patterns[0]
-    YAKUMAN_LIST = {"国士無双","国士無双十三面待ち","清老頭", "四暗刻", "四暗刻単騎", "九蓮宝燈", "純正九蓮宝燈", "大三元", "四槓子", "小四喜", "大四喜"}
+    YAKUMAN_LIST = {"国士無双","国士無双十三面待ち","清老頭", "四暗刻", "四暗刻単騎", "九蓮宝燈", "純正九蓮宝燈", "大三元", "四槓子", "小四喜", "大四喜","清老頭"}
     yakumann_obj = Yakumann()
     for yaku in result.get("yaku_list", []):
         if yaku in YAKUMAN_LIST:
@@ -45,7 +46,16 @@ def calculate_score(hand, condition):
     print()
     print(agari_pattern[1])
 
-    fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu,is_kokushi,is_kokushi_13machi) 
+    
+    yaku_list = result.get("yaku_list", [])
+    if "国士無双" in yaku_list or "国士無双十三面待ち" in yaku_list:
+        fu = 0  # 国士無双は符計算不要（飜数・点数は役満固定）
+        print()
+        print("符計算スキップ：国士無双 or 国士無双十三面待ち")
+    else:
+        fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu, is_kokushi, is_kokushi_13machi)
+        print()
+        print("符計算結果", fu)
 
     #符表示
     print()

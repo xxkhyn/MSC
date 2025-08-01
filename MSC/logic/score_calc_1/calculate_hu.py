@@ -25,7 +25,7 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiito
     #国士無双の場合、仮の符（３０）を返す
     if yakuis_kokushi(counts,Yakumann()):
         return 30
-    if yakuis_kokushi_13machi(counts, Yakumann()):
+    if yakuis_kokushi_13machi(counts,winning_tile, Yakumann()):
         return 30
     
     # 初期符（門前ロンのみ30符、それ以外は20符）

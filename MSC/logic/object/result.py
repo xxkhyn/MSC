@@ -12,15 +12,17 @@ from types import SimpleNamespace
 def test_calculate_score():
     # ===== テスト用のダミー手牌 =====
     # 例: 萬子1〜4の順子x3 + 東ポン + 東雀頭
-    hand_pai = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'z1', 'z1', 'z1', 'z2']
-    winning_pai = 'z2'
+    hand_pai = ['m1', 'm9', 'p1', 'p9', 's1', 's9', 'z1', 'z2', 'z3', 'z4', 'z5', 'z6', 'z7']
+    winning_pai = 'm1'
     huuro = []  # 副露なし
 
     # Handオブジェクト風
     Hand = SimpleNamespace(
         hand_pai=hand_pai,
         winning_pai=winning_pai,
-        huuro=huuro
+        is_huuro=False,
+        is_tsumo = True,
+        huuro = []
     )
 
     # ===== Condition =====
@@ -28,7 +30,7 @@ def test_calculate_score():
         seat_wind='east',
         prevalent_wind='east',
        
-        is_riichi=True,
+        is_riichi=False,
         is_double_riichi=False,
         is_ippatsu=False,
         is_rinshan=False,
