@@ -40,23 +40,34 @@ def calculate_waits(parsed_hand):
 
 ### === 役満 ===
 
-def is_kokushi(tiles: List[int], yakumann, huuro=None):
-    pair_count = 0
-    for idx in KOKUSHI_INDICES:
-        if tiles[idx] == 0:
-            return False
-        if tiles[idx] >= 2:
-            pair_count += 1
-    if pair_count == 1 and sum(tiles) == 14:
-        yakumann.add_yaku("国士無双")
-        return True
+def is_kokushi(tiles_str: list[str], yakumann: Yakumann) -> bool:
+    terminals_and_honors = {'m1','m9','p1','p9','s1','s9',
+                            'z1','z2','z3','z4','z5','z6','z7'}
+    tile_set = set(tiles_str)
+    if not terminals_and_honors.issubset(tile_set):
+        return False
+    counts = Counter(tiles_str)
+    for t in terminals_and_honors:
+        if counts[t] >= 2:
+            yakumann.add_yaku("国士無双")
+            return True
     return False
 
-def is_kokushi_13machi(tiles: List[int], winning_tile_index: int, yakumann, huuro=None):
-    if all(tiles[idx] == 1 for idx in KOKUSHI_INDICES) and winning_tile_index in KOKUSHI_INDICES:
-        yakumann.add_yaku("国士無双十三面待ち")
-        return True
-    return False
+
+def is_kokushi_13machi(tiles: List[int], winning_tile_index: int, yakumann):
+    for idx in KOKUSHI_INDICES:
+        count = tiles[idx]
+        if idx == winning_tile_index:
+            # 和了牌は2枚までOK
+            if count < 2:
+                return False
+        else:
+            # 他は1枚のみ
+            if count != 1:
+                return False
+    yakumann.add_yaku("国士無双十三面待ち")
+    return True
+
 
 def is_chinroutou(tiles: list[int], yakumann, huuro=None):
     # 字牌が混ざっていたらFalse
@@ -199,11 +210,12 @@ def is_ryanpeikou(parsed_hand: dict, yaku_counter, huuro=None):
         return True
     return False
 
-def is_chiitoitsu(tiles: List[int], yaku_counter, huuro=None):
-    if sum(1 for t in tiles if t == 2) == 7:
-        yaku_counter.add_yaku("七対子", 2)
-        return True
-    return False
+def is_chiitoitsu(tiles):
+    if len(tiles) != 14:
+        return False
+    counts = Counter(tiles)
+    pairs = [c for c in counts.values() if c == 2]
+    return len(pairs) == 7
 
 def is_ikkitsuukan(parsed_hand: dict, yaku_counter, huuro=None):
     suits = {"m":[False]*3, "p":[False]*3, "s":[False]*3}
@@ -375,3 +387,33 @@ def is_junchan(parsed_hand: dict, yaku_counter, huuro=None):
 
     yaku_counter.add_yaku("純全帯么", 3 if huuro else 6)
     return True
+
+
+def resolve_conflicts(yaku_counter, yakumann):
+    """
+    両立できない役の競合を除去する。
+    yakumann: Yakumann インスタンス
+    yaku_counter: YakuCounter インスタンス
+    """
+    # 役満があれば通常役はすべて無効
+    if yakumann.get_count() > 0:
+        yaku_counter.clear()
+        return
+
+    # 平和と対々和は両立不可
+    if "平和" in yaku_counter.get_yakus() and "対々和" in yaku_counter.get_yakus():
+        yaku_counter.remove_yaku("対々和", 1)  # 平和優先
+
+    # 七対子と二盃口は両立不可（ローカルルール次第）
+    if "七対子" in yaku_counter.get_yakus() and "二盃口" in yaku_counter.get_yakus():
+        yaku_counter.remove_yaku("七対子", 2)  # 二盃口の方が翻数高いので七対子を削除
+
+    # 七対子と対々和は両立不可
+    if "七対子" in yaku_counter.get_yakus() and "対々和" in yaku_counter.get_yakus():
+        yaku_counter.remove_yaku("対々和", 2)
+
+    # 七対子と三暗刻も同時成立しない
+    if "七対子" in yaku_counter.get_yakus() and "三暗刻" in yaku_counter.get_yakus():
+        yaku_counter.remove_yaku("三暗刻", 2)
+
+    # 追加で他のルールがあればここに追記
