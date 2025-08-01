@@ -2,12 +2,17 @@ from MSC.logic.parser.parse_def import TILE_TO_NUMERIC
 TILE_TO_INDEX = TILE_TO_NUMERIC
 from MSC.models import Condition
 from MSC.logic.yaku.yaku import is_chiitoitsu
+from MSC.logic.yaku.yaku import is_kokushi
+from MSC.logic.yaku.yaku import is_kokushi_13machi
 from MSC.logic.object.han import YakuCounter
+from MSC.logic.object.han import Yakumann
 from MSC.logic.parser.parse_def import tile_strs_to_indices
 import math
-
+yakuis_kokushi = is_kokushi
+yakuis_kokushi_13machi = is_kokushi_13machi
 yakuis_chiitoitsu = is_chiitoitsu
-def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiitoitsu) -> int:
+def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiitoitsu,
+                 yakuis_kokushi,yakuis_kokushi_13machi) -> int:
     mentsu_list, head = _normalize_mentsu_list(agari_pattern[0]), agari_pattern[1]
     winning_tile = TILE_TO_INDEX[hand_instance.winning_pai]
 
@@ -17,6 +22,12 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiito
     if yakuis_chiitoitsu(counts, YakuCounter()):
         return 25
 
+    #国士無双の場合、仮の符（３０）を返す
+    if yakuis_kokushi(counts,Yakumann()):
+        return 30
+    if yakuis_kokushi_13machi(counts, Yakumann()):
+        return 30
+    
     # 初期符（門前ロンのみ30符、それ以外は20符）
     if not hand_instance.is_tsumo and not hand_instance.is_huuro:
         fu = 30  # 門前ロン
