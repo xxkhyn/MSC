@@ -28,15 +28,17 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiito
     if yakuis_kokushi_13machi(counts,winning_tile, Yakumann()):
         return 30
     
+    # 門前平和ツモなら20符固定で終了
+    if _is_pinfu(mentsu_list, head, winning_tile, hand_instance.is_huuro, hand_instance.is_tsumo):
+        return 20
+    
     # 初期符（門前ロンのみ30符、それ以外は20符）
     if not hand_instance.is_tsumo and not hand_instance.is_huuro:
         fu = 30  # 門前ロン
     else:
         fu = 20
 
-    # 門前平和ツモなら20符固定で終了
-    if _is_pinfu(mentsu_list, head, winning_tile, hand_instance.is_huuro, hand_instance.is_tsumo):
-        return 20
+    
 
     # 雀頭が役牌（自風・場風・三元牌）なら +2符
     if _is_yakuhai(head[0], condition_instance):

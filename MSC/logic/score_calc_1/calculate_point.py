@@ -84,12 +84,12 @@ class ScoreCalculator:#han.pyのYakumannから役満の数を受け取り、そ�
         #if is_tsumo:
         if is_oya:
             score_val = ScoreCalculator.round_up_100(base * 6)
-            score_val += 1000 * kyotaku + 100 * honba
+            score_val += 1000 * kyotaku + 300 * honba
 
         else:
             ko_score = ScoreCalculator.round_up_100(base)
             oya_score = ScoreCalculator.round_up_100(base * 2)
-            score_val = ko_score * 2 + oya_score + 1000 * kyotaku + 100 * honba
+            score_val = ko_score * 2 + oya_score + 1000 * kyotaku + 300 * honba
         '''else:
             score_val = ScoreCalculator.round_up_100(
             (base * 6 if is_oya else base * 4) + 300 * honba + 1000 * kyotaku

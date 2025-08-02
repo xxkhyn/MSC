@@ -21,7 +21,7 @@ def test_calculate_score():
         hand_pai=hand_pai,
         winning_pai=winning_pai,
         is_huuro=False,
-        is_tsumo = True,
+        is_tsumo = False,
         huuro = []
     )
 
@@ -38,7 +38,7 @@ def test_calculate_score():
         is_haitei=False,
         is_houtei=False,
         is_tenho=False,
-        is_tsumo=True,
+        is_tsumo=False,
          
     )
 

@@ -56,7 +56,9 @@ def judge_condition_yaku(parsed_hand, yaku_counter, condition: Condition):
     prevalent_wind_tile = wind_to_tile(condition.prevalent_wind)
 
     if condition.is_double_riichi:
-        yaku_counter.remove_yaku("リーチ")
+        yaku_counter.add_yaku("ダブルリーチ", 2)
+    elif condition.is_riichi:
+        yaku_counter.add_yaku("リーチ", 1)
     if condition.is_ippatsu:
         yaku_counter.add_yaku("一発", 1)
     if condition.is_rinshan:
