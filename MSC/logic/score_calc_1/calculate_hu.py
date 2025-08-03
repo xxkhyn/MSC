@@ -140,8 +140,8 @@ def _is_pinfu(mentsu_list, head, winning_tile, is_huuro, is_tsumo):
         return False
     if not head or len(head) == 0:
         return False
-    '''if head[0] >= TILE_TO_INDEX["z1"]:  # 字牌の雀頭は役牌の可能性
-        return False'''
+    if head[0] >= TILE_TO_INDEX["z1"]:  # 字牌の雀頭は役牌の可能性
+        return False
     for m in mentsu_list:
         tiles = m["tiles"]
         if len(tiles) == 3 and len(set(tiles)) == 1:

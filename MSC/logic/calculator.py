@@ -14,6 +14,7 @@ from MSC.logic.object.han import Yakumann
 
 def calculate_score(hand, condition):
 
+    
     result=full_flow.run_full_flow(hand,condition)
     yakumann = Yakumann()
     yakumann_obj = yakumann.get_count()
