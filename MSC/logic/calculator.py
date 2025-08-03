@@ -45,7 +45,10 @@ def calculate_score(hand, condition):
     #雀頭
     print()
     print(agari_pattern[1])
-
+    
+    #役リスト表示
+    print()
+    print(result['yaku_list'])
     
     yaku_list = result.get("yaku_list", [])
     if "国士無双" in yaku_list or "国士無双十三面待ち" in yaku_list:
@@ -61,9 +64,7 @@ def calculate_score(hand, condition):
     print()
     print("符計算結果",fu)
 
-    #役リスト表示
-    print()
-    print(result['yaku_list'])
+    
 
     if condition.player_type == 'parent':
         is_oya = True
