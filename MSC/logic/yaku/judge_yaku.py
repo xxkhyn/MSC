@@ -97,10 +97,16 @@ def normalize(yaku_name):
     return yaku_name.strip()
 
 def similar(yaku1, yaku2):
-    pairs = [("国士無双十三面待ち", "国士無双")]
     y1 = normalize(yaku1)
     y2 = normalize(yaku2)
-    return (y1, y2) in pairs or (y2, y1) in pairs
+    if y1 == y2:
+        return True
+    # CONFLICT_RULES に従ってチェック
+    if y1 in CONFLICT_RULES and y2 in CONFLICT_RULES[y1]:
+        return True
+    if y2 in CONFLICT_RULES and y1 in CONFLICT_RULES[y2]:
+        return True
+    return False
 
 def remove_similar_duplicates(yaku_dict):
     print("重複除去前:", yaku_dict)

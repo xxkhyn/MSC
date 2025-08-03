@@ -335,15 +335,22 @@ def is_ryanpeikou(parsed_hand: dict, yaku_counter, huuro=None):
         return True
     return False
 
-def is_chiitoitsu(tiles_counts,yaku_counter):
-    if len(tiles_counts) != 14:
+def is_chiitoitsu(tiles, yaku_counter=None):
+    if len(tiles) != 14:
+        print("牌が14枚じゃない!")
         return False
-    counts = Counter(tiles_counts)
-    pairs = [c for c in counts.values() if c == 2]
-    if len(pairs) == 7:
-        yaku_counter.add_yaku("七対子", 2)
+    counts = Counter(tiles)
+    pair_count = sum(1 for c in counts.values() if c == 2)
+    print("Counter:", counts)
+    print("pair_count:", pair_count)
+    if pair_count == 7:
+        if yaku_counter:
+            yaku_counter.add_yaku("七対子", 2)
         return True
     return False
+
+tiles = ["m1","m1","m2","m2","m3","m3","m4","m4","m5","m5","m6","m6","m7","m7"]
+print(is_chiitoitsu(tiles))  # True になる
 
 
 def is_ikkitsuukan(parsed_hand: dict, yaku_counter, huuro=None):

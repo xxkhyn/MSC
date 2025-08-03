@@ -79,22 +79,24 @@ def analyze_hand_model(hand_obj):
                 "error_message": "",
                 "aka_dora_count": aka_dora_count,
             }
+       
+
         elif is_chiitoitsu(tiles_cleaned, yakucounter):
             counts = Counter(tiles_cleaned)
             pairs = []
             for tile, c in counts.items():
                 if c == 2:
                     pairs.append([tile, tile])
+            final_patterns = [[pairs, None]]
             return {
                 "chiitoitsu": True,
-                "agari_patterns": [[pairs, None]],
+                "agari_patterns": final_patterns,
                 "melds": [],
-                "wait": [hand_obj.winning_pai],
                 "melds_descriptions": ["七対子"],
+                "wait": [hand_obj.winning_pai],
                 "error_message": "",
                 "aka_dora_count": aka_dora_count,
             }
-
     # === 副露を agari_patterns に合体 ===
     final_patterns = []
     for pattern in agari_patterns:
