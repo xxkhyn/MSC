@@ -11,7 +11,7 @@ from MSC.logic.yaku.yaku import (
     is_ryanpeikou, is_chiitoitsu, is_ikkitsuukan, is_sanshoku_doujun,
     is_sankantsu, is_sanankou, is_toitoi, is_honroutou,
     is_sanshoku_doukou, is_tanyao, is_pinfu, is_iipeikou,
-    resolve_conflicts
+    resolve_conflicts,is_chinitsu,is_honitsu
 )
 
 
@@ -32,6 +32,7 @@ CONFLICT_RULES = {
     "純全帯么": ["断么九"],
     "清一色": ["混一色"],
     "混一色": ["清一色"],
+    "四暗刻":["一盃口"]
 }
 
 
@@ -156,6 +157,8 @@ def judge_yaku(parsed_hand, huuro=None, condition=None):
         remove_similar_duplicates(yakumann.get_yakus())
         return yakumann.get_yakus()
 
+    is_chinitsu(parsed_hand, yaku_counter, huuro)
+    is_honitsu(parsed_hand, yaku_counter, huuro)
     is_ryanpeikou(parsed_hand, yaku_counter, huuro)
     is_chiitoitsu(tiles_counts, yaku_counter)
     is_ikkitsuukan(parsed_hand, yaku_counter, huuro)

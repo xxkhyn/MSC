@@ -6,7 +6,7 @@ from MSC.logic.yaku.yaku import is_chiitoitsu
 from MSC.logic.yaku.yaku import is_kokushi
 from MSC.logic.yaku.yaku import is_kokushi_13machi
 from MSC.logic.object.han import YakuCounter
-from MSC.models import Condition
+from MSC.models import Condition,Hand
 from MSC.logic.score_calc_1.calculate_hu import calculate_fu
 from MSC.logic.score_calc_1.calculate_point import ScoreCalculator
 from MSC.logic.object.han import Yakumann

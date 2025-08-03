@@ -1,4 +1,4 @@
-from MSC.logic.parser import parser
+from MSC.logic.parser import parse_def
 from MSC.logic.object.han import YakuCounter
 from MSC.logic.object.han import Yakumann
 from MSC.models import ScoreResult
@@ -184,18 +184,143 @@ def is_suukantsu(parsed_hand: dict, yakumann, huuro=None):
     return False
 
 def is_suuankou(parsed_hand: dict, yakumann, huuro=None):
-    if sum(1 for m in parsed_hand.get("mentsu", []) if m["type"] == "kotsu" and not m.get("open", False)) == 4:
+    closed_kotsu = sum(
+        1 for m in parsed_hand.get("mentsu", [])
+        if m["type"] == "kotsu" and not m.get("open", False)
+    )
+    if closed_kotsu == 4:
         yakumann.add_yaku("四暗刻")
         return True
     return False
 
+
+
 def is_suuankou_tanki(parsed_hand: dict, yakumann, huuro=None):
-    if sum(1 for m in parsed_hand.get("mentsu", []) if m["type"] == "kotsu" and not m.get("open", False)) == 4 and parsed_hand.get("wait") == "tanki":
-        yakumann.add_yaku("四暗刻単騎")
+    closed_kotsu = sum(
+        1 for m in parsed_hand.get("mentsu", [])
+        if m["type"] == "kotsu" and not m.get("open", False)
+    )
+
+    if closed_kotsu == 4:
+        pair_tiles = parsed_hand.get("pair", {}).get("tiles", [])
+        wait_tiles = parsed_hand.get("wait", [])
+        if isinstance(wait_tiles, str):
+            wait_tiles = [wait_tiles]
+
+        # 牌名 → 数値インデックスに変換
+        wait_indices = []
+        for w in wait_tiles:
+            if isinstance(w, str):
+                idx = parse_def.TILE_TO_NUMERIC.get(w)
+                if idx is not None:
+                    wait_indices.append(idx)
+            else:
+                wait_indices.append(w)
+
+        # 比較
+        if any(w in pair_tiles for w in wait_indices):
+            yakumann.add_yaku("四暗刻単騎")
+            return True
+    return False
+
+
+
+
+
+
+
+### === 翻役 ===
+
+
+def is_chinitsu(parsed_hand: dict, yaku_counter, huuro=None):
+    tiles = []
+
+    # まず全面子のタイルを数字で収集
+    for m in parsed_hand.get("mentsu", []):
+        if isinstance(m, dict):
+            tiles.extend(m.get("tiles", []))
+        elif isinstance(m, list):
+            tiles.extend(m)
+        else:
+            # 不明な形式ならスキップまたはログ出し
+            continue
+
+    # 対子のタイルも追加
+    pair = parsed_hand.get("pair", {})
+    if pair:
+        if isinstance(pair.get("tiles"), list):
+            tiles.extend(pair["tiles"])
+
+    # 副露の牌も加える（鳴きありの場合）
+    if huuro:
+        for meld in huuro:
+            if "tiles" in meld:
+                # meld["tiles"]は文字列なので数字に変換が必要なら適宜変換
+                tiles.extend(meld["tiles"])
+
+    # 数字タイルが数字型の場合も想定しつつ、タイルコード(例:'m1')を文字列で扱う場合に合わせて
+    suits = set()
+    for t in tiles:
+        # もし数字なら NUMERIC_TO_TILE を使って変換
+        if isinstance(t, int):
+            tile_str = parse_def.NUMERIC_TO_TILE[t]
+        else:
+            tile_str = t
+        if tile_str.startswith("z"):
+            # 字牌が混ざったら清一色は成立しない
+            return False
+        suits.add(tile_str[0])
+
+    if len(suits) == 1:
+        han = 5 if huuro else 6
+        yaku_counter.add_yaku("清一色", han)
         return True
     return False
 
-### === 翻役 ===
+
+
+def is_honitsu(parsed_hand: dict, yaku_counter, huuro=None):
+    tiles = []
+
+    # 面子と対子の牌を収集
+    for m in parsed_hand.get("mentsu", []):
+        if isinstance(m, dict):
+            tiles.extend(m.get("tiles", []))
+        elif isinstance(m, list):
+            tiles.extend(m)
+    pair = parsed_hand.get("pair", {})
+    if pair and "tiles" in pair:
+        tiles.extend(pair["tiles"])
+
+    # 鳴きがあればそこも含む
+    if huuro:
+        for meld in huuro:
+            if "tiles" in meld:
+                tiles.extend(meld["tiles"])
+
+    suits = set()
+    has_jihai = False
+
+    for t in tiles:
+        if isinstance(t, int):
+            tile_str = parse_def.NUMERIC_TO_TILE[t]
+        else:
+            tile_str = t
+
+        if tile_str.startswith("z"):
+            has_jihai = True
+        else:
+            suits.add(tile_str[0])
+
+    # 数牌が1種類のみかつ字牌ありなら混一色
+    if has_jihai and len(suits) == 1:
+        han = 2 if huuro else 3  # 鳴きありなら3翻、なしなら6翻など好きな調整で
+        yaku_counter.add_yaku("混一色", han)
+        return True
+    return False
+
+
+
 
 def is_ryanpeikou(parsed_hand: dict, yaku_counter, huuro=None):
     if huuro: return False

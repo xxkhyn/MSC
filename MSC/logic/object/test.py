@@ -11,9 +11,22 @@ from types import SimpleNamespace
 
 
 def test_run_full_flow():
-    hand_pai = ['m1', 'm9', 's1', 's9', 'p1', 'p9', 'z1', 'z2', 'z3','z4','z5','z6','z7']
-    winning_pai = 'm1'
-    huuro = []
+    hand_pai = ['m1', 'm1',
+    'm1',
+    'm2',
+    'm2',
+    'm2',
+    'm3',
+    'm3',
+    'm3',
+    'm4',
+    'm4',
+    'm4',
+    'm5'] 
+    winning_pai = 'm5'
+    huuro = [
+        ]
+
     dora_pai = ['m5']
 
     hand = SimpleNamespace(
@@ -43,12 +56,21 @@ def test_run_full_flow():
     print("Han:", result["han"])
     print("Yaku List:", result["yaku_list"])
     print("Agari Patterns:", result["agari_patterns"])
+
+    for idx, agari in enumerate(result["agari_patterns"]):
+        print(f"Pattern {idx}:")
+        print("  mentsu:", agari[0])
+        print("  pair:", agari[1])
+
+
     
-    agari = result["agari_patterns"]
+    agari = result.get("agari_patterns", [])
+    if agari:
+        print(agari[0][0])
+        print(agari[0][1])
+    else:
+        print("和了形なし agari_patterns is empty")
 
-    print(agari[0][0])
-
-    print(agari[0][1])
 
     print("Meld Descriptions:", result["melds_descriptions"])
     print("Error:", result["error_message"])

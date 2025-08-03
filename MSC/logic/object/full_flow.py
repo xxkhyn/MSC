@@ -7,14 +7,28 @@ from MSC.logic.object.dora import count_dora
 
 
 def classify_mentsu(m):
+    print(f"[classify_mentsu] raw input: {m}")
+
+    if isinstance(m, dict):
+        print("[classify_mentsu] already dict, return type:", m.get("type"))
+        return m.get("type", "unknown")
+
     if len(m) == 3:
-        if m[0] + 1 == m[1] and m[1] + 1 == m[2]:
+        m_sorted = sorted(m)
+        print(f"[classify_mentsu] sorted: {m_sorted}")
+        if m_sorted[0] + 1 == m_sorted[1] and m_sorted[1] + 1 == m_sorted[2]:
+            print("[classify_mentsu] -> SHUNTSU")
             return "shuntsu"
-        elif m[0] == m[1] == m[2]:
+        elif m_sorted[0] == m_sorted[1] == m_sorted[2]:
+            print("[classify_mentsu] -> KOTSU")
             return "kotsu"
     elif len(m) == 4:
-        return "kantsu"
+        print("[classify_mentsu] -> KAN")
+        return "kan"
+
+    print("[classify_mentsu] -> UNKNOWN")
     return "unknown"
+
 
 
 def flatten_and_convert(lst):
@@ -22,6 +36,7 @@ def flatten_and_convert(lst):
         if isinstance(item, list):
             yield from flatten_and_convert(item)
         else:
+            print(f"[flatten_and_convert] item: {item}")
             if isinstance(item, str):
                 yield parse_def.TILE_TO_NUMERIC[item]
             else:
@@ -69,18 +84,15 @@ def run_full_flow(hand: Hand, condition: Condition = None):
         dora_pai=getattr(hand, "dora_pai", []),
     )
 
-    # 解析実行
+    # === 解析実行 ===
     result = parser.analyze_hand_model(hand_obj)
 
-    # 待ち牌計算（resultにないか空の場合は自前計算）
-    wait_tiles = result.get("wait")
-    if not wait_tiles:
-        wait_tiles = find_waiting_tiles(hand_obj, parser)
+    # 待ち牌計算
+    wait_tiles = result.get("wait") or find_waiting_tiles(hand_obj, parser)
     result["wait"] = wait_tiles
 
-    print("待ち牌:", result.get("wait"))
+    print("待ち牌:", wait_tiles)
 
-    # numeric に変換
     hand_numeric = parse_def.all_tiles_to_indices(hand_obj)
     hand_obj.hand_numeric = hand_numeric
 
@@ -94,46 +106,96 @@ def run_full_flow(hand: Hand, condition: Condition = None):
 
     is_chiitoitsu = False
     is_kokushi = False
-    mentsu, pair = [], []
+    mentsu = []
+    pair = []
 
+    
+
+    # === 面子構築 ===
+    print("[run_full_flow] raw agari_patterns:", result["agari_patterns"])
+    parsed_mentsu = []
+    for m in mentsu:
+        print("[run_full_flow] raw mentsu item:", m)
+        if isinstance(m, dict):
+            parsed_mentsu.append(m)
+        elif isinstance(m, list):
+            m_flat = list(flatten_and_convert(m))
+            print("[run_full_flow] flat converted:", m_flat)
+            parsed_mentsu.append({
+                "type": classify_mentsu(m_flat),
+                "tiles": m_flat
+            })
+        else:
+            print(f"[run_full_flow] Unknown mentsu type: {m}")
+
+# === agari_patterns でパターン決定 ===
     if result["agari_patterns"]:
-        first_pattern = result["agari_patterns"][0]
-        if len(first_pattern) == 2:
-            if first_pattern[1] is None:
-                is_chiitoitsu = True
-                pair = []
-                mentsu = first_pattern[0]
-            else:
-                mentsu = first_pattern[0]
-                pair = first_pattern[1]
-        elif "kokushi" in result or "kokushi_13machi" in result:
+        agari_patterns = result["agari_patterns"]
+        final_pattern = agari_patterns[0]
+
+        for pattern in agari_patterns:
+            test_mentsu, test_pair = pattern
+            kotsu_count = 0
+            for m in test_mentsu:
+                m_type = classify_mentsu(m)
+                if m_type == "kotsu":
+                    kotsu_count += 1
+            if kotsu_count == 4:
+                final_pattern = pattern
+                print("[選択] 四暗刻候補パターン採用")
+                break
+
+        mentsu, pair = final_pattern
+
+        # チートイツか国士は別扱い
+        if "kokushi" in result or "kokushi_13machi" in result:
             is_kokushi = True
+        if pair is None:
+            is_chiitoitsu = True
+
+        # === 面子解析 ===
+        parsed_mentsu = []
+        for m in mentsu:
+            if isinstance(m, dict):
+                parsed_mentsu.append(m)
+            elif isinstance(m, list):
+                m_flat = list(flatten_and_convert(m))
+                parsed_mentsu.append({
+                    "type": classify_mentsu(m_flat),
+                    "tiles": m_flat
+                })
+
+        parsed_pair = {"tiles": list(flatten_and_convert(pair))} if pair else {"tiles": []}
+
+        parsed_hand = {
+            "hand_numeric": hand_numeric,
+            "agari_patterns": result["agari_patterns"],
+            "mentsu": parsed_mentsu,
+            "pair": parsed_pair,
+            "melds": huuro,
+            "huuro": huuro,
+            "tiles_count": tiles_count,
+            "winning_tile_index": winning_tile_index,
+            "wait": wait_tiles,
+            "is_chiitoitsu": is_chiitoitsu,
+            "is_kokushi": is_kokushi,
+        }
+
+        # === 単騎待ちチェック ===
+        if pair and len(pair) == 2 and pair[0] == pair[1]:
+            if pair[0] == winning_tile_index:
+                parsed_hand["wait"] = "tanki"
+
     else:
         return {
             "han": 0,
             "yaku_list": {},
             "agari_patterns": [],
-            "melds_descriptions": [],
+            "melds_descriptions": result.get("melds_descriptions", []),
             "error_message": result.get("error_message", ""),
             "wait": [],
         }
 
-    parsed_hand = {
-        "hand_numeric": hand_numeric,
-        "agari_patterns": result["agari_patterns"],
-        "mentsu": [
-            {"type": classify_mentsu(m), "tiles": list(flatten_and_convert(m))}
-            for m in mentsu
-        ] if mentsu else [],
-        "pair": {"tiles": list(flatten_and_convert(pair))} if pair else {"tiles": []},
-        "melds": [],
-        "huuro": huuro,
-        "tiles_count": tiles_count,
-        "winning_tile_index": winning_tile_index,
-        "wait": wait_tiles,
-        "is_chiitoitsu": is_chiitoitsu,
-        "is_kokushi": is_kokushi,
-    }
 
     yaku_result = judge_yaku(parsed_hand, huuro, condition)
     total_han = sum(yaku_result.values())
@@ -149,7 +211,7 @@ def run_full_flow(hand: Hand, condition: Condition = None):
         yaku_result["赤ドラ"] = aka_dora_count
         total_han += aka_dora_count
 
-    print("wait tiles:", wait_tiles)
+    print("役:", yaku_result)
 
     return {
         "han": total_han,
