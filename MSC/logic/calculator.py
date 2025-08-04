@@ -27,11 +27,7 @@ def calculate_score(hand, condition):
 
     agari_patterns = result.get('agari_patterns')
     agari_pattern = agari_patterns[0]
-<<<<<<< Updated upstream
-    YAKUMAN_LIST = {"国士無双","国士無双十三面待ち","清老頭", "四暗刻", "四暗刻単騎", "九蓮宝燈", "純正九蓮宝燈", "大三元", "四槓子", "小四喜", "大四喜","清老頭"}
-=======
     YAKUMAN_LIST = {"国士無双","国士無双十三面待ち","清老頭", "四暗刻", "四暗刻単騎", "九蓮宝燈", "純正九蓮宝燈", "大三元", "四槓子", "小四喜", "大四喜"}
->>>>>>> Stashed changes
     yakumann_obj = Yakumann()
     for yaku in result.get("yaku_list", []):
         if yaku in YAKUMAN_LIST:
@@ -50,7 +46,6 @@ def calculate_score(hand, condition):
     #雀頭
     print()
     print(agari_pattern[1])
-<<<<<<< Updated upstream
     
     #役リスト表示
     print()
@@ -65,10 +60,6 @@ def calculate_score(hand, condition):
         fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu, is_kokushi, is_kokushi_13machi)
         print()
         print("符計算結果", fu)
-=======
-
-    fu = calculate_fu(hand, condition, agari_pattern, is_chiitoitsu,is_kokushi,is_kokushi_13machi) 
->>>>>>> Stashed changes
 
     #符表示
     print()
