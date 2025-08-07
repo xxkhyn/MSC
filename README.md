@@ -37,7 +37,7 @@ source venv/bin/activate
 pip install -r requirements.txt  
 （requirements.txtに記載されているパッケージをインストールするコマンド）  
 
-⑤以下のコマンドを実行してアプリケーションの起動をしてください。  
+⑤MSC_PROJECTディレクトリ（manage.pyがあるディレクトリ）に移動し、以下のコマンドを実行してアプリケーションの起動をしてください。  
 python manage.py runserver  
 （開発サーバーの立ち上げ）  
 
