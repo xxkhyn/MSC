@@ -113,6 +113,8 @@ def calculate_score_api(request):
             if condition is None:
                 raise ValueError("Condition データが存在しません")
 
+            condition.is_tsumo = hand.is_tsumo
+
             print("\n手牌オブジェクト:", hand)
             print("\n条件オブジェクト:", condition)
 
