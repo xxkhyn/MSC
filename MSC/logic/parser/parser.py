@@ -1,14 +1,9 @@
 from collections import Counter
 from MSC.logic.object.han import Yakumann, YakuCounter
 from MSC.logic.yaku.yaku import is_kokushi, is_kokushi_13machi, is_chiitoitsu
-from . import parse_def  # あなたの tile_strs_to_indices 等
+from . import parse_def
 from MSC.logic.yaku.yaku import KOKUSHI_INDICES
 
-
-# MSC/logic/parser/parser.py
-KOKUSHI_INDICES = [0,8,9,17,18,26,27,28,29,30,31,32,33]
-
-# 以降に parser の定義...
 
 def analyze_hand_model(hand_obj):
     aka_dora_count = 0
@@ -25,7 +20,7 @@ def analyze_hand_model(hand_obj):
             tile = tile[1] + tile[0]
         tiles_cleaned.append(tile)
 
-    # 副露も
+    # 副露も正規化
     for meld in hand_obj.huuro:
         new_tiles = []
         for t in meld["tiles"]:
@@ -79,7 +74,6 @@ def analyze_hand_model(hand_obj):
                 "error_message": "",
                 "aka_dora_count": aka_dora_count,
             }
-       
 
         elif is_chiitoitsu(tiles_cleaned, yakucounter):
             counts = Counter(tiles_cleaned)
@@ -87,16 +81,24 @@ def analyze_hand_model(hand_obj):
             for tile, c in counts.items():
                 if c == 2:
                     pairs.append([tile, tile])
-            final_patterns = [[pairs, None]]
+            if pairs:
+                # 七対子は雀頭を1つの対子として、残りの6つを面子扱いで返す
+                pair = pairs[0]
+                mentsu = pairs[1:]
+                final_patterns = [(mentsu, pair)]
+            else:
+                final_patterns = []
+
             return {
                 "chiitoitsu": True,
                 "agari_patterns": final_patterns,
                 "melds": [],
-                "melds_descriptions": ["七対子"],
                 "wait": [hand_obj.winning_pai],
+                "melds_descriptions": ["七対子"],
                 "error_message": "",
                 "aka_dora_count": aka_dora_count,
             }
+
     # === 副露を agari_patterns に合体 ===
     final_patterns = []
     for pattern in agari_patterns:
@@ -108,8 +110,6 @@ def analyze_hand_model(hand_obj):
     if not agari_patterns and melds:
         final_patterns = [(melds, None)]
 
-
-    
     print("[analyze_hand_model] final agari_patterns:", agari_patterns)
 
     return {

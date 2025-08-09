@@ -194,7 +194,6 @@ def is_suuankou(parsed_hand: dict, yakumann, huuro=None):
     return False
 
 
-
 def is_suuankou_tanki(parsed_hand: dict, yakumann, huuro=None):
     closed_kotsu = sum(
         1 for m in parsed_hand.get("mentsu", [])
@@ -222,9 +221,6 @@ def is_suuankou_tanki(parsed_hand: dict, yakumann, huuro=None):
             yakumann.add_yaku("四暗刻単騎")
             return True
     return False
-
-
-
 
 
 
@@ -335,23 +331,16 @@ def is_ryanpeikou(parsed_hand: dict, yaku_counter, huuro=None):
         return True
     return False
 
-def is_chiitoitsu(tiles, yaku_counter=None):
-    if len(tiles) != 14:
-        print("牌が14枚じゃない!")
+def is_chiitoitsu(tiles_counts, yaku_counter):
+    # tiles_counts は牌のリスト ['m1', 'm1', 'p2', ...]
+    if len(tiles_counts) != 14:
         return False
-    counts = Counter(tiles)
-    pair_count = sum(1 for c in counts.values() if c == 2)
-    print("Counter:", counts)
-    print("pair_count:", pair_count)
-    if pair_count == 7:
-        if yaku_counter:
-            yaku_counter.add_yaku("七対子", 2)
+    counts = Counter(tiles_counts)
+    pairs = [tile for tile, c in counts.items() if c == 2]
+    if len(pairs) == 7:
+        yaku_counter.add_yaku("七対子", 2)
         return True
     return False
-
-tiles = ["m1","m1","m2","m2","m3","m3","m4","m4","m5","m5","m6","m6","m7","m7"]
-print(is_chiitoitsu(tiles))  # True になる
-
 
 def is_ikkitsuukan(parsed_hand: dict, yaku_counter, huuro=None):
     suits = {"m":[False]*3, "p":[False]*3, "s":[False]*3}
