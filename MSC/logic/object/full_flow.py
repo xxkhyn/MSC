@@ -150,9 +150,13 @@ def run_full_flow(hand: Hand, condition: Condition = None):
         # チートイツか国士は別扱い
         if "kokushi" in result or "kokushi_13machi" in result:
             is_kokushi = True
-        if pair is None:
-            is_chiitoitsu = True
+        is_chiitoitsu = result.get("chiitoitsu", False)
 
+# チートイツなら pair が None でも必ず対子1組を頭としてセット
+        if is_chiitoitsu and pair is None:
+    # mentsu は7組の対子リストなので、先頭の1組を頭にする
+            if mentsu and len(mentsu) > 0:
+                pair = mentsu[0]
         # === 面子解析 ===
         parsed_mentsu = []
         for m in mentsu:
