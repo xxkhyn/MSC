@@ -151,6 +151,9 @@ def judge_yaku(parsed_hand, huuro=None, condition=None):
         is_chinroutou(tiles_counts, yakumann)
         is_tsuuiisou(tiles_counts, yakumann)
 
+    if is_chiitoitsu(tiles_str, yaku_counter):
+        remove_similar_duplicates(yaku_counter.get_yakus())
+        return yaku_counter.get_yakus()
     is_chuuren(parsed_hand, yakumann)
     is_ryuisou(parsed_hand, yakumann)
     is_daisuusii(parsed_hand, yakumann)
@@ -166,7 +169,7 @@ def judge_yaku(parsed_hand, huuro=None, condition=None):
     is_chinitsu(parsed_hand, yaku_counter, huuro)
     is_honitsu(parsed_hand, yaku_counter, huuro)
     is_ryanpeikou(parsed_hand, yaku_counter, huuro)
-    is_chiitoitsu(tiles_counts, yaku_counter)
+    
     is_ikkitsuukan(parsed_hand, yaku_counter, huuro)
     is_sanshoku_doujun(parsed_hand, yaku_counter, huuro)
     is_sankantsu(parsed_hand, yaku_counter, huuro)

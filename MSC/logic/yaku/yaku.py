@@ -334,6 +334,7 @@ def is_ryanpeikou(parsed_hand: dict, yaku_counter, huuro=None):
 def is_chiitoitsu(tiles_counts, yaku_counter):
     # tiles_counts は牌のリスト ['m1', 'm1', 'p2', ...]
     if len(tiles_counts) != 14:
+        print(tiles_counts)
         return False
     counts = Counter(tiles_counts)
     pairs = [tile for tile, c in counts.items() if c == 2]

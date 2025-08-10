@@ -41,6 +41,9 @@ def analyze_hand_model(hand_obj):
     yakucounter = YakuCounter()
 
     # === 特殊役 ===
+    chiitoi_result = is_chiitoitsu(tiles_cleaned, yakucounter)
+    print("[DEBUG] 七対子判定:", chiitoi_result, "手牌:", tiles_cleaned)
+
     if not agari_patterns:
         tiles_count = [0] * 34
         for t in tiles_cleaned:
@@ -75,6 +78,8 @@ def analyze_hand_model(hand_obj):
                 "aka_dora_count": aka_dora_count,
             }
 
+        
+
         elif is_chiitoitsu(tiles_cleaned, yakucounter):
             counts = Counter(tiles_cleaned)
             pairs = []
@@ -98,7 +103,9 @@ def analyze_hand_model(hand_obj):
                 "error_message": "",
                 "aka_dora_count": aka_dora_count,
             }
+        
 
+        
     # === 副露を agari_patterns に合体 ===
     final_patterns = []
     for pattern in agari_patterns:

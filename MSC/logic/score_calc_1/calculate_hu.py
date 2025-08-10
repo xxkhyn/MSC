@@ -19,8 +19,11 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiito
     # 七対子チェック（正しく counts34 相当のリストを作成）
     tile_indices = tile_strs_to_indices(hand_instance)
     counts = [tile_indices.count(i) for i in range(34)]
-    if yakuis_chiitoitsu(counts, YakuCounter()):
-        return 25
+    if not hand_instance.is_huuro:
+        tile_str_list = hand_instance.hand_pai + [hand_instance.winning_pai]
+        if yakuis_chiitoitsu(tile_str_list, YakuCounter()):
+            print("七対子の符計算完了")
+            return 25
 
     #国士無双の場合、仮の符（３０）を返す
     if yakuis_kokushi(counts,Yakumann()):
@@ -66,6 +69,7 @@ def calculate_fu(hand_instance, condition_instance, agari_pattern, yakuis_chiito
         fu += 2
 
     return math.ceil(fu / 10) * 10
+
 
 
 def _is_yakuhai(tile_index, condition):
@@ -140,8 +144,8 @@ def _is_pinfu(mentsu_list, head, winning_tile, is_huuro, is_tsumo):
         return False
     if not head or len(head) == 0:
         return False
-    if head[0] >= TILE_TO_INDEX["z1"]:  # 字牌の雀頭は役牌の可能性
-        return False
+    '''if head[0] >= TILE_TO_INDEX["z1"]:  # 字牌の雀頭は役牌の可能性
+        return False'''
     for m in mentsu_list:
         tiles = m["tiles"]
         if len(tiles) == 3 and len(set(tiles)) == 1:

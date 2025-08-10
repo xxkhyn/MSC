@@ -18,6 +18,7 @@ def calculate_score(hand, condition):
     result=full_flow.run_full_flow(hand,condition)
     yakumann = Yakumann()
     yakumann_obj = yakumann.get_count()
+    
 
     
     print(yakumann.get_count)
@@ -50,6 +51,7 @@ def calculate_score(hand, condition):
     #役リスト表示
     print()
     print(result['yaku_list'])
+    
     
     yaku_list = result.get("yaku_list", [])
     if "国士無双" in yaku_list or "国士無双十三面待ち" in yaku_list:
